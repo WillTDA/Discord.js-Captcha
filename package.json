@@ -1,6 +1,6 @@
 {
   "name": "discord.js-captcha",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A powerful package for discord.js that allows you to easily create CAPTCHAs for Discord Servers.",
   "main": "src/index.js",
   "scripts": {
