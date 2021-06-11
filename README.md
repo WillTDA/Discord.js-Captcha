@@ -2,9 +2,11 @@
 
 A powerful package for discord.js that allows you to easily create CAPTCHAs for Discord Servers.
 
-### <u>What is a**CAPTCHA**?</u>
+### <u>What is a **CAPTCHA**?</u>
 
-Put simply, a **CAPTCHA** is a question you have to answer to prove you are not a robot. **CAPTCHA** is an acronym for:
+Put simply, a **CAPTCHA** is a question you have to answer to prove you are not a robot.
+
+**CAPTCHA** is an acronym for:
 
 **C**ompletely
 
