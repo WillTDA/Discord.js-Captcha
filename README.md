@@ -2,6 +2,24 @@
 
 A powerful package for discord.js that allows you to easily create CAPTCHAs for Discord Servers.
 
+### <u>What is a**CAPTCHA**?</u>
+
+Put simply, a **CAPTCHA** is a question you have to answer to prove you are not a robot. **CAPTCHA** is an acronym for:
+
+**C**ompletely
+
+**A**utomated
+
+**P**ublic
+
+**T**uring Test (to tell)
+
+**C**omputers (and humans)
+
+**A**part
+
+To learn more about what a CAPTCHA is, you can [watch this video](https://www.youtube.com/watch?v=o1zNIm8GVPY&ab_channel=TomScott) by Tom Scott.
+
 # Install Package
 
 To install this awesome module, type the command shown below into your Terminal.
@@ -40,6 +58,11 @@ Use the parameter `sendToTextChannel`, and set it to `true` to always send the C
 Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked.
 
 Use the parameter `channelID` to specify the Text Channel.
+
+# What do the CAPTCHAs look like?
+Below is an image of what answering a CAPTCHA will look like:
+
+![Image of Captcha](https://github.com/WillTDA/discord.js-captcha/blob/master/src/images/captchaExample.jpg?raw=true)
 
 # Need Help or Find any Bugs? Join Our Discord Server!
 
