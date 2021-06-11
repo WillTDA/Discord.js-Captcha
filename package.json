@@ -1,0 +1,24 @@
+{
+  "name": "discord.js-captcha",
+  "version": "1.0.0",
+  "description": "A powerful package for discord.js that allows you to easily create CAPTCHAs for Discord Servers.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "discord.js",
+    "discord",
+    "captcha",
+    "recaptcha",
+    "turing test",
+    "im not a robot"
+  ],
+  "author": "WillTDA",
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.8.0",
+    "discord.js": "^12.5.3",
+    "lodash": "^4.17.21"
+  }
+}
