@@ -10,6 +10,8 @@
     "discord.js",
     "discord",
     "captcha",
+    "discord.js-captcha",
+    "discord.js captcha",
     "recaptcha",
     "turing test",
     "im not a robot"
