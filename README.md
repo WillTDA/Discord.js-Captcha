@@ -1,6 +1,8 @@
-# Discord.js Captcha
+<h1 align="center">
+    🎓 Discord.js Captcha 🎓
+</h1>
 
-A powerful package for discord.js that allows you to easily create CAPTCHAs for Discord Servers.
+A powerful package for discord.js v13 that allows you to easily create CAPTCHAs for Discord Servers.
 
 ### <u>What is a **CAPTCHA**?</u>
 
@@ -31,10 +33,10 @@ To install this awesome module, type the command shown below into your Terminal.
 # Example Code
 
 ```js
-const Discord = require("discord.js");
-const client = new Discord.Client();
+const { Client, Intents } = require("discord.js");
+const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.DIRECT_MESSAGES] });
 
-const { Captcha } = require("discord.js-captcha"); 
+const { Captcha } = require("discord.js-captcha");
 
 const captcha = new Captcha(client, {
     guildID: "Guild ID Here",
@@ -42,9 +44,9 @@ const captcha = new Captcha(client, {
     channelID: "Text Channel ID Here", //optional
     sendToTextChannel: Boolean, //optional
 });
- 
+
 client.on("guildMemberAdd", async member => {
-    //in your bot application, make sure you have intents turned on!
+    //in your bot application in the dev portal, make sure you have intents turned on!
     captcha.present(member);
 });
 

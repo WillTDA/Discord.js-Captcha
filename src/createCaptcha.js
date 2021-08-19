@@ -1,5 +1,5 @@
-const Canvas = require('canvas').Canvas;
-const lodash = require("lodash");
+const { Canvas } = require('canvas')
+const { shuffle } = require("lodash");
 const chars = require("./chars.json");
 
 module.exports = async function createCaptcha() {
@@ -29,7 +29,7 @@ module.exports = async function createCaptcha() {
         for (let j = 0; j < 5; j++)
             coords[i][j] = Math.round(Math.random() * 80) + j * 80;
         if (!(i % 2))
-            coords[i] = lodash.shuffle(coords[i]);
+            coords[i] = shuffle(coords[i]);
     }
 
     for (let i = 0; i < coords.length; i++) {
@@ -73,7 +73,7 @@ module.exports = async function createCaptcha() {
 
     // Set text value and print it to canvas
     ctx.beginPath();
-    let text = lodash.shuffle(chars).slice(0, 6).join("");
+    let text = shuffle(chars).slice(0, 6).join("");
     ctx.fillText(text, 0, 0);
 
     // Draw foreground noise

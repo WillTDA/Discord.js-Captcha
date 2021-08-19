@@ -1,9 +1,9 @@
 'use strict';
 
+const { Collection } = require('@discordjs/collection');
 const Base = require('./Base');
 const TeamMember = require('./TeamMember');
-const Collection = require('../util/Collection');
-const Snowflake = require('../util/Snowflake');
+const SnowflakeUtil = require('../util/SnowflakeUtil');
 
 /**
  * Represents a Client OAuth2 Application Team.
@@ -17,7 +17,7 @@ class Team extends Base {
 
   _patch(data) {
     /**
-     * The ID of the Team
+     * The Team's id
      * @type {Snowflake}
      */
     this.id = data.id;
@@ -32,13 +32,13 @@ class Team extends Base {
      * The Team's icon hash
      * @type {?string}
      */
-    this.icon = data.icon || null;
+    this.icon = data.icon ?? null;
 
     /**
      * The Team's owner id
-     * @type {?string}
+     * @type {?Snowflake}
      */
-    this.ownerID = data.owner_user_id || null;
+    this.ownerId = data.owner_user_id ?? null;
 
     /**
      * The Team's members
@@ -58,7 +58,7 @@ class Team extends Base {
    * @readonly
    */
   get owner() {
-    return this.members.get(this.ownerID) || null;
+    return this.members.get(this.ownerId) ?? null;
   }
 
   /**
@@ -67,7 +67,7 @@ class Team extends Base {
    * @readonly
    */
   get createdTimestamp() {
-    return Snowflake.deconstruct(this.id).timestamp;
+    return SnowflakeUtil.deconstruct(this.id).timestamp;
   }
 
   /**
@@ -80,9 +80,9 @@ class Team extends Base {
   }
 
   /**
-   * A link to the teams's icon.
-   * @param {ImageURLOptions} [options={}] Options for the Image URL
-   * @returns {?string} URL to the icon
+   * A link to the team's icon.
+   * @param {StaticImageURLOptions} [options={}] Options for the Image URL
+   * @returns {?string}
    */
   iconURL({ format, size } = {}) {
     if (!this.icon) return null;

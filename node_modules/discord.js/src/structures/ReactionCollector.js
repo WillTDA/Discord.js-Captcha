@@ -1,7 +1,7 @@
 'use strict';
 
+const { Collection } = require('@discordjs/collection');
 const Collector = require('./interfaces/Collector');
-const Collection = require('../util/Collection');
 const { Events } = require('../util/Constants');
 
 /**
@@ -20,11 +20,10 @@ const { Events } = require('../util/Constants');
 class ReactionCollector extends Collector {
   /**
    * @param {Message} message The message upon which to collect reactions
-   * @param {CollectorFilter} filter The filter to apply to this collector
    * @param {ReactionCollectorOptions} [options={}] The options to apply to this collector
    */
-  constructor(message, filter, options = {}) {
-    super(message.client, filter, options);
+  constructor(message, options = {}) {
+    super(message.client, options);
 
     /**
      * The message upon which to collect reactions
@@ -81,10 +80,11 @@ class ReactionCollector extends Collector {
   /**
    * Handles an incoming reaction for possible collection.
    * @param {MessageReaction} reaction The reaction to possibly collect
-   * @returns {?Snowflake|string}
+   * @param {User} user The user that added the reaction
+   * @returns {Promise<?(Snowflake|string)>}
    * @private
    */
-  collect(reaction) {
+  async collect(reaction, user) {
     /**
      * Emitted whenever a reaction is collected.
      * @event ReactionCollector#collect
@@ -92,6 +92,19 @@ class ReactionCollector extends Collector {
      * @param {User} user The user that added the reaction
      */
     if (reaction.message.id !== this.message.id) return null;
+
+    /**
+     * Emitted whenever a reaction is newly created on a message. Will emit only when a new reaction is
+     * added to the message, as opposed to {@link Collector#collect} which which will
+     * be emitted even when a reaction has already been added to the message.
+     * @event ReactionCollector#create
+     * @param {MessageReaction} reaction The reaction that was added
+     * @param {User} user The user that added the reaction
+     */
+    if (reaction.count === 1 && (await this.filter(reaction, user, this.collected))) {
+      this.emit('create', reaction, user);
+    }
+
     return ReactionCollector.key(reaction);
   }
 
@@ -99,7 +112,7 @@ class ReactionCollector extends Collector {
    * Handles a reaction deletion for possible disposal.
    * @param {MessageReaction} reaction The reaction to possibly dispose of
    * @param {User} user The user that removed the reaction
-   * @returns {?Snowflake|string}
+   * @returns {?(Snowflake|string)}
    */
   dispose(reaction, user) {
     /**
@@ -132,7 +145,12 @@ class ReactionCollector extends Collector {
     this.checkEnd();
   }
 
-  endReason() {
+  /**
+   * The reason this collector has ended with, or null if it hasn't ended yet
+   * @type {?string}
+   * @readonly
+   */
+  get endReason() {
     if (this.options.max && this.total >= this.options.max) return 'limit';
     if (this.options.maxEmojis && this.collected.size >= this.options.maxEmojis) return 'emojiLimit';
     if (this.options.maxUsers && this.users.size >= this.options.maxUsers) return 'userLimit';
@@ -158,7 +176,7 @@ class ReactionCollector extends Collector {
    * @returns {void}
    */
   _handleChannelDeletion(channel) {
-    if (channel.id === this.message.channel.id) {
+    if (channel.id === this.message.channelId) {
       this.stop('channelDelete');
     }
   }
@@ -170,7 +188,7 @@ class ReactionCollector extends Collector {
    * @returns {void}
    */
   _handleGuildDeletion(guild) {
-    if (this.message.guild && guild.id === this.message.guild.id) {
+    if (guild.id === this.message.guild?.id) {
       this.stop('guildDelete');
     }
   }
@@ -181,7 +199,7 @@ class ReactionCollector extends Collector {
    * @returns {Snowflake|string}
    */
   static key(reaction) {
-    return reaction.emoji.id || reaction.emoji.name;
+    return reaction.emoji.id ?? reaction.emoji.name;
   }
 }
 

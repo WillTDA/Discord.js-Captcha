@@ -16,17 +16,16 @@ const { Events } = require('../util/Constants');
  */
 class MessageCollector extends Collector {
   /**
-   * @param {TextChannel|DMChannel} channel The channel
-   * @param {CollectorFilter} filter The filter to be applied to this collector
+   * @param {TextBasedChannels} channel The channel
    * @param {MessageCollectorOptions} options The options to be applied to this collector
    * @emits MessageCollector#message
    */
-  constructor(channel, filter, options = {}) {
-    super(channel.client, filter, options);
+  constructor(channel, options = {}) {
+    super(channel.client, options);
 
     /**
      * The channel
-     * @type {TextBasedChannel}
+     * @type {TextBasedChannels}
      */
     this.channel = channel;
 
@@ -71,7 +70,7 @@ class MessageCollector extends Collector {
      * @event MessageCollector#collect
      * @param {Message} message The message that was collected
      */
-    if (message.channel.id !== this.channel.id) return null;
+    if (message.channelId !== this.channel.id) return null;
     this.received++;
     return message.id;
   }
@@ -87,15 +86,15 @@ class MessageCollector extends Collector {
      * @event MessageCollector#dispose
      * @param {Message} message The message that was disposed of
      */
-    return message.channel.id === this.channel.id ? message.id : null;
+    return message.channelId === this.channel.id ? message.id : null;
   }
 
   /**
-   * Checks after un/collection to see if the collector is done.
-   * @returns {?string}
-   * @private
+   * The reason this collector has ended with, or null if it hasn't ended yet
+   * @type {?string}
+   * @readonly
    */
-  endReason() {
+  get endReason() {
     if (this.options.max && this.collected.size >= this.options.max) return 'limit';
     if (this.options.maxProcessed && this.received === this.options.maxProcessed) return 'processedLimit';
     return null;
@@ -120,7 +119,7 @@ class MessageCollector extends Collector {
    * @returns {void}
    */
   _handleGuildDeletion(guild) {
-    if (this.channel.guild && guild.id === this.channel.guild.id) {
+    if (guild.id === this.channel.guild?.id) {
       this.stop('guildDelete');
     }
   }

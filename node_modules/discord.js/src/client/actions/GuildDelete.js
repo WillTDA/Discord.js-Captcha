@@ -14,10 +14,6 @@ class GuildDeleteAction extends Action {
 
     let guild = client.guilds.cache.get(data.id);
     if (guild) {
-      for (const channel of guild.channels.cache.values()) {
-        if (channel.type === 'text') channel.stopTyping(true);
-      }
-
       if (data.unavailable) {
         // Guild is unavailable
         guild.available = false;
@@ -36,8 +32,8 @@ class GuildDeleteAction extends Action {
         };
       }
 
-      for (const channel of guild.channels.cache.values()) this.client.channels.remove(channel.id);
-      if (guild.voice && guild.voice.connection) guild.voice.connection.disconnect();
+      for (const channel of guild.channels.cache.values()) this.client.channels._remove(channel.id);
+      client.voice.adapters.get(data.id)?.destroy();
 
       // Delete guild
       client.guilds.cache.delete(guild.id);
@@ -53,14 +49,14 @@ class GuildDeleteAction extends Action {
       this.deleted.set(guild.id, guild);
       this.scheduleForDeletion(guild.id);
     } else {
-      guild = this.deleted.get(data.id) || null;
+      guild = this.deleted.get(data.id) ?? null;
     }
 
     return { guild };
   }
 
   scheduleForDeletion(id) {
-    this.client.setTimeout(() => this.deleted.delete(id), this.client.options.restWsBridgeTimeout);
+    setTimeout(() => this.deleted.delete(id), this.client.options.restWsBridgeTimeout).unref();
   }
 }
 
