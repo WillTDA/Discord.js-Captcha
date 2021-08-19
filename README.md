@@ -30,6 +30,14 @@ To install this awesome module, type the command shown below into your Terminal.
 
 `npm i discord.js-captcha --save`
 
+For versions 2.0.0 and Above, you'll also need discord.js v13.
+
+`npm i discord.js@13 --save`
+
+For versions earlier than 2.0.0, you'll need discord.js v12. However it is recommended you update to patch bugs and security vulnerabilities.
+
+`npm i discord.js@12 --save`
+
 # Example Code
 
 ```js
