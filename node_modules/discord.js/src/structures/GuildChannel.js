@@ -20,12 +20,6 @@ const Util = require('../util/Util');
  * @abstract
  */
 class GuildChannel extends Channel {
-  /**
-   * @param {Guild} guild The guild the guild channel is part of
-   * @param {APIChannel} data The data for the guild channel
-   * @param {Client} [client] A safety parameter for the client that instantiated this
-   * @param {boolean} [immediatePatch=true] Control variable for patching
-   */
   constructor(guild, data, client, immediatePatch = true) {
     super(guild?.client ?? client, data, false);
 
@@ -172,7 +166,7 @@ class GuildChannel extends Channel {
     if (!verified) member = this.guild.members.resolve(member);
     if (!member) return [];
 
-    if (!roles) roles = member.roles.cache;
+    roles ??= member.roles.cache;
     const roleOverwrites = [];
     let memberOverwrites;
     let everyoneOverwrites;
@@ -294,7 +288,7 @@ class GuildChannel extends Channel {
    *   .catch(console.error);
    */
   async edit(data, reason) {
-    if (data.parent) data.parent = this.client.channels.resolveId(data.parent);
+    data.parent &&= this.client.channels.resolveId(data.parent);
 
     if (typeof data.position !== 'undefined') {
       const updatedChannels = await Util.setPosition(
@@ -497,11 +491,7 @@ class GuildChannel extends Channel {
    * @readonly
    */
   get deletable() {
-    return (
-      this.permissionsFor(this.client.user).has(Permissions.FLAGS.MANAGE_CHANNELS, false) &&
-      this.guild.rulesChannelId !== this.id &&
-      this.guild.publicUpdatesChannelId !== this.id
-    );
+    return this.manageable && this.guild.rulesChannelId !== this.id && this.guild.publicUpdatesChannelId !== this.id;
   }
 
   /**
@@ -511,14 +501,12 @@ class GuildChannel extends Channel {
    */
   get manageable() {
     if (this.client.user.id === this.guild.ownerId) return true;
-    if (VoiceBasedChannelTypes.includes(this.type)) {
-      if (!this.permissionsFor(this.client.user).has(Permissions.FLAGS.CONNECT, false)) {
-        return false;
-      }
-    } else if (!this.viewable) {
-      return false;
-    }
-    return this.permissionsFor(this.client.user).has(Permissions.FLAGS.MANAGE_CHANNELS, false);
+    const permissions = this.permissionsFor(this.client.user);
+    if (!permissions) return false;
+    const bitfield = VoiceBasedChannelTypes.includes(this.type)
+      ? Permissions.FLAGS.MANAGE_CHANNELS | Permissions.FLAGS.CONNECT
+      : Permissions.FLAGS.VIEW_CHANNEL | Permissions.FLAGS.MANAGE_CHANNELS;
+    return permissions.has(bitfield, false);
   }
 
   /**

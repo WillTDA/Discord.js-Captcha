@@ -2,12 +2,18 @@ const Discord = require("discord.js");
 const createCaptcha = require("./createCaptcha");
 const handleChannelType = require("./handleChannelType");
 /**
- * Captcha Parameters
+ * Captcha Options
  * @typedef {object} captchaOptions
  * @prop {string} guildID The ID of the Discord Server to Create a CAPTCHA for.
  * @prop {string} roleID The ID of the Discord Role to Give when the CAPTCHA is complete.
- * @prop {string} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the parameter "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
- * @prop {boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the parameter "channelID" to specify the Text Channel.
+ * @prop {string} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the option "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
+ * @prop {boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the option "channelID" to specify the Text Channel.
+ * @prop {number} [attempts=1] (OPTIONAL): The Number of Attempts Given to Solve the CAPTCHA.
+ * @prop {number} [timeout=60000] (OPTIONAL): The Time in Milliseconds before the CAPTCHA expires and the User is Kicked.
+ * @prop {boolean} [showAttemptCount=true] (OPTIONAL): Whether you want to show the Attempt Count in the CAPTCHA Prompt. (Displayed in Embed Footer)
+ * @prop {Discord.MessageEmbed} [customPromptEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Prompt.
+ * @prop {Discord.MessageEmbed} [customSuccessEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Success Message.
+ * @prop {Discord.MessageEmbed} [customFailureEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
  * 
  */
 
@@ -15,7 +21,13 @@ const captchaOptions = {
     guildID: String,
     roleID: String,
     channelID: undefined,
-    sendToTextChannel: false
+    sendToTextChannel: false,
+    attempts: 1,
+    timeout: 60000,
+    showAttemptCount: true,
+    customPromptEmbed: undefined,
+    customSuccessEmbed: undefined,
+    customFailureEmbed: undefined
 }
 
 class Captcha {
@@ -26,9 +38,24 @@ class Captcha {
     * __Captcha Options__
     * 
     * - `guildID` - The ID of the Discord Server to Create a CAPTCHA for.
+    * 
     * - `roleID` - The ID of the Discord Role to Give when the CAPTCHA is complete.
+    * 
     * - `channelID` - The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked.
+    * 
     * - `sendToTextChannel` - Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked.
+    * 
+    * - `attempts` - The Number of Attempts Given to Solve the CAPTCHA.
+    * 
+    * - `timeout` - The Time in Milliseconds before the CAPTCHA expires and the User is Kicked.
+    * 
+    * - `showAttemptCount` - Whether you want to show the Attempt Count in the CAPTCHA Prompt. (Displayed in Embed Footer)
+    * 
+    * - `customPromptEmbed` - Custom Discord Embed to be Shown for the CAPTCHA Prompt.
+    * 
+    * - `customSuccessEmbed` - Custom Discord Embed to be Shown for the CAPTCHA Success Message.
+    * 
+    * - `customFailureEmbed` - Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
     * 
     * @param {captchaOptions} options The Options for the Captcha.
     * @param {Discord.Client} client The Discord Client.
@@ -43,7 +70,13 @@ class Captcha {
     *     guildID: "Guild ID Here",
     *     roleID: "Role ID Here",
     *     channelID: "Text Channel ID Here", //optional
-    *     sendToTextChannel: Boolean, //optional
+    *     sendToTextChannel: false, //optional, defaults to false
+    *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
+    *     timeout: 30000, //optional. amount of time the user has to solve the captcha on each attempt in milliseconds
+    *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
+    *     customPromptEmbed: new MessageEmbed(), //custom embed for the captcha prompt
+    *     customSuccessEmbed: new MessageEmbed(), //custom embed for success message
+    *     customFailureEmbed: new MessageEmbed(), //custom embed for failure message
     * });
        */
     constructor(client, options = {}) {
@@ -52,9 +85,9 @@ class Captcha {
         new Captcha(Discord#Client, {
             guildID: "Guild ID Here",
             roleID: "Role ID Here",
-            channelID: "Text Channel ID Here", //optional
-            sendToTextChannel: Boolean, //optional
-        });`
+        });
+        
+        (More options can be viewed on the README at https://npmjs.com/discord.js-captcha)`
 
         if (!client) {
             console.log(`Discord.js Captcha Error: No Discord Client was Provided!\n\nFollow this Structure:\n${structure}\n\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
@@ -79,6 +112,30 @@ class Captcha {
             console.log(`Discord.js Captcha Error: Option "sendToTextChannel" was set to true, but "channelID" was not Provided!\n\nFollow this Structure:\n${structure}\n\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
+        if (options.attempts < 1) {
+            console.log(`Discord.js Captcha Error: Option "attempts" must be Greater than 0!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            process.exit(1)
+        }
+        if (options.timeout < 1) {
+            console.log(`Discord.js Captcha Error: Option "timeout" must be Greater than 0!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            process.exit(1)
+        }
+        if (options.customPromptEmbed && (typeof options.customPromptEmbed === "string")) {
+            console.log(`Discord.js Captcha Error: Option "customPromptEmbed" is not an instance of MessageEmbed!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            process.exit(1)
+        }
+        if (options.customSuccessEmbed && (typeof options.customSuccessEmbed === "string")) {
+            console.log(`Discord.js Captcha Error: Option "customSuccessEmbed" is not an instance of MessageEmbed!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            process.exit(1)
+        }
+        if (options.customFailureEmbed && (typeof options.customFailureEmbed === "string")) {
+            console.log(`Discord.js Captcha Error: Option "customFailureEmbed" is not an instance of MessageEmbed!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            process.exit(1)
+        }
+
+        options.attempts = options.attempts || 1;
+        options.timeout = options.timeout || 60000;
+        options.showAttemptCount = options.showAttemptCount || true;
 
         Object.assign(this.options, options);
     }
@@ -96,7 +153,13 @@ class Captcha {
     *     guildID: "Guild ID Here",
     *     roleID: "Role ID Here",
     *     channelID: "Text Channel ID Here", //optional
-    *     sendToTextChannel: Boolean, //optional
+    *     sendToTextChannel: false, //optional, defaults to false
+    *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
+    *     timeout: 30000, //optional. amount of time the user has to solve the captcha on each attempt in milliseconds
+    *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
+    *     customPromptEmbed: new MessageEmbed(), //custom embed for the captcha prompt
+    *     customSuccessEmbed: new MessageEmbed(), //custom embed for success message
+    *     customFailureEmbed: new MessageEmbed(), //custom embed for failure message
     * });
     * 
     * client.on("guildMemberAdd", async member => {
@@ -107,8 +170,9 @@ class Captcha {
         if (!member) return console.log(`Discord.js Captcha Error: No Discord Member was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
         const user = member.user
         const captcha = await createCaptcha().catch(e => { return console.log(e) })
+        let attemptsLeft = this.options.attempts || 1;
 
-        const captchaIncorrect = new Discord.MessageEmbed()
+        let captchaIncorrect = new Discord.MessageEmbed()
             .setTitle("❌ You Failed to Complete the CAPTCHA!")
             .setDescription(`${member.user}, you didn't solve the CAPTCHA, and you were kicked from **${member.guild.name}**.\nCAPTCHA Text: **${captcha.text}**`)
             .addField("What Should I Do?", "No need to worry! You can just try again by re-joining the server!")
@@ -116,12 +180,26 @@ class Captcha {
             .setColor("RED")
             .setThumbnail(member.guild.iconURL())
 
-        const captchaCorrect = new Discord.MessageEmbed()
+        if (this.options.customFailureEmbed) captchaIncorrect = this.options.customFailureEmbed
+
+        let captchaCorrect = new Discord.MessageEmbed()
             .setTitle("✅ CAPTCHA Solved!")
             .setDescription(`${member.user}, you completed the CAPTCHA successfully, and you have been given access to **${member.guild.name}**!`)
             .setTimestamp()
             .setColor("GREEN")
             .setThumbnail(member.guild.iconURL())
+
+        if (this.options.customSuccessEmbed) captchaCorrect = this.options.customSuccessEmbed
+
+        let captchaPrompt = new Discord.MessageEmbed()
+            .setTitle(`Welcome to ${member.guild.name}!`)
+            .addField("I'm Not a Robot", `${member.user}, to gain access to **${member.guild.name}**, please solve the CAPTCHA below!\n\nThis is done to protect the server from raids consisting of spam bots.`)
+            .setColor("RANDOM")
+            .setThumbnail(member.guild.iconURL())
+
+        if (this.options.customPromptEmbed) captchaPrompt = this.options.customPromptEmbed
+        if (this.options.showAttemptCount) captchaPrompt.setFooter(this.options.attempts == 1 ? "Failure to solve the CAPTCHA will have you kicked from the server. You can try again by re-joining!" : `Attempts Left: ${attemptsLeft}`)
+        captchaPrompt.setImage('attachment://captcha.png')
 
         await handleChannelType(this.client, this.options, user).then(async channel => {
             let captchaEmbed;
@@ -133,15 +211,7 @@ class Captcha {
                     channel = await user.createDM()
                 }
                 captchaEmbed = await channel.send({
-                    embeds: [
-                        new Discord.MessageEmbed()
-                            .setTitle(`Welcome to ${member.guild.name}!`)
-                            .addField("I'm Not a Robot", `${member.user}, to gain access to **${member.guild.name}**, please solve the CAPTCHA below within 60 seconds!\n\nThis is done to protect the server from raids consisting of spam bots.`)
-                            .setFooter("Failure to Solve the CAPTCHA will have you kicked from the server. You can try again by re-joining!")
-                            .setColor("RANDOM")
-                            .setThumbnail(member.guild.iconURL())
-                            .setImage('attachment://captcha.png')
-                    ],
+                    embeds: [captchaPrompt],
                     files: [
                         { name: "captcha.png", attachment: captcha.image }
                     ]
@@ -150,21 +220,13 @@ class Captcha {
                 channel = (await this.client.guilds.fetch(this.options.guildID)).channels.resolve(this.options.channelID)
                 if (this.options.channelID) {
                     captchaEmbed = await channel.send({
-                        embeds: [
-                            new Discord.MessageEmbed()
-                                .setTitle(`Welcome to ${member.guild.name}!`)
-                                .addField("I'm Not a Robot", `${member.user}, to gain access to **${member.guild.name}**, please solve the CAPTCHA below within 60 seconds!\n\nThis is done to protect the server from raids consisting of spam bots.`)
-                                .setFooter("Failure to Solve the CAPTCHA will have you kicked from the server. You can try again by re-joining!")
-                                .setColor("RANDOM")
-                                .setThumbnail(member.guild.iconURL())
-                                .setImage('attachment://captcha.png')
-                        ],
+                        embeds: [captchaPrompt],
                         files: [
                             { name: "captcha.png", attachment: captcha.image }
                         ]
                     })
                 } else {
-                    return console.log(`Discord.js Captcha Error: User's Direct Messages are Locked!\nYou can attempt have the CAPTCHA sent to a Text Channel if it can't send to DMs by using the "channelID" Parameter in the Constructor.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+                    return console.log(`Discord.js Captcha Error: User's Direct Messages are Locked!\nYou can attempt have the CAPTCHA sent to a Text Channel if it can't send to DMs by using the "channelID" Option in the Constructor.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
                 }
             }
 
@@ -172,38 +234,62 @@ class Captcha {
                 return (x.author.id == member.user.id)
             }
 
-            await captchaEmbed.channel.awaitMessages({
-                filter: captchaFilter, max: 1, time: 60000
-            })
-                .then(async responses => {
-                    if (!responses.size) {
-                        await member.kick("Failed to Pass CAPTCHA")
-                        await captchaEmbed.delete();
-                        return channel.send({ embeds: [captchaIncorrect] })
-                            .then(async msg => {
-                                if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
-                            });
-                    }
-
-                    const answer = String(responses.first());
-                    if (channel.type === "GUILD_TEXT") await responses.first().delete();
-
-                    if (answer === captcha.text) {
-                        await member.roles.add(this.options.roleID)
-                        if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
-                        return channel.send({ embeds: [captchaCorrect] })
-                            .then(async msg => {
-                                if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
-                            });
-                    } else {
-                        await member.kick("Failed to Pass CAPTCHA")
-                        if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
-                        return channel.send({ embeds: [captchaIncorrect] })
-                            .then(async msg => {
-                                if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
-                            });
-                    }
+            async function handleAttempt(options) { //Handles CAPTCHA Responses and Checks
+                await captchaEmbed.channel.awaitMessages({
+                    filter: captchaFilter, max: 1, time: options.timeout
                 })
+                    .then(async responses => {
+                        if (!responses.size) { //If no response was given, CAPTCHA is fully cancelled here
+                            await member.kick("Failed to Pass CAPTCHA")
+                            await captchaEmbed.delete();
+                            return channel.send({ embeds: [captchaIncorrect] })
+                                .then(async msg => {
+                                    if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
+                                });
+                        }
+
+                        const answer = String(responses.first()); //Converts the response message to a string
+                        if (channel.type === "GUILD_TEXT") await responses.first().delete();
+
+                        if (answer === captcha.text) { //If the answer is correct, this code will execute
+                            await member.roles.add(options.roleID)
+                            if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
+                            return channel.send({ embeds: [captchaCorrect] })
+                                .then(async msg => {
+                                    if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
+                                });
+                        } else { //If the answer is incorrect, this code will execute
+                            if (attemptsLeft > 1) { //If there are attempts left
+                                attemptsLeft--;
+                                if (channel.type === "GUILD_TEXT" && options.showAttemptCount) {
+                                    await captchaEmbed.edit({
+                                        embeds: [captchaPrompt.setFooter(`Attempts Left: ${attemptsLeft}`)],
+                                        files: [
+                                            { name: "captcha.png", attachment: captcha.image }
+                                        ]
+                                    })
+                                }
+                                else if (channel.type !== "GUILD_TEXT") {
+                                    await captchaEmbed.channel.send({
+                                        embeds: [options.showAttemptCount ? captchaPrompt.setFooter(`Attempts Left: ${attemptsLeft}`) : captchaPrompt],
+                                        files: [
+                                            { name: "captcha.png", attachment: captcha.image }
+                                        ]
+                                    })
+                                }
+                                return handleAttempt(options);
+                            }
+                            //If there are no attempts left, the user is kicked here
+                            await member.kick("Failed to Pass CAPTCHA")
+                            if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
+                            return channel.send({ embeds: [captchaIncorrect] })
+                                .then(async msg => {
+                                    if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
+                                });
+                        }
+                    })
+            }
+            handleAttempt(this.options);
         })
     }
 }
