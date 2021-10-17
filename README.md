@@ -85,11 +85,11 @@ Use the option `channelID` to specify the Text Channel.
 
 There are five events that you can use to log CAPTCHA actions, responses, and other details. They are:
 
-- `prompt`
-- `answer`
-- `success`
-- `failure`
-- `timeout`
+- `prompt` - Emitted when a CAPTCHA is presented to a user.
+- `answer` - Emitted when a user responds to a CAPTCHA.
+- `success` - Emitted when a CAPTCHA is successfully solved.
+- `failure` - Emitted when a CAPTCHA is failed to be solved.
+- `timeout` - Emitted when a user does not solve the CAPTCHA in time.
 
 All of these events are emitted by the `Captcha` class. Here's an example of how to use them:
 
