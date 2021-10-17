@@ -8,8 +8,9 @@ const handleChannelType = require("./handleChannelType");
  * @prop {string} roleID The ID of the Discord Role to Give when the CAPTCHA is complete.
  * @prop {string} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the option "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
  * @prop {boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the option "channelID" to specify the Text Channel.
+ * @prop {boolean} [kickOnFailure=true] (OPTIONAL): Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
  * @prop {number} [attempts=1] (OPTIONAL): The Number of Attempts Given to Solve the CAPTCHA.
- * @prop {number} [timeout=60000] (OPTIONAL): The Time in Milliseconds before the CAPTCHA expires and the User is Kicked.
+ * @prop {number} [timeout=60000] (OPTIONAL): The Time in Milliseconds before the CAPTCHA expires and the User fails the CAPTCHA.
  * @prop {boolean} [showAttemptCount=true] (OPTIONAL): Whether you want to show the Attempt Count in the CAPTCHA Prompt. (Displayed in Embed Footer)
  * @prop {Discord.MessageEmbed} [customPromptEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Prompt.
  * @prop {Discord.MessageEmbed} [customSuccessEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Success Message.
@@ -22,6 +23,7 @@ const captchaOptions = {
     roleID: String,
     channelID: undefined,
     sendToTextChannel: false,
+    kickOnFailure: true,
     attempts: 1,
     timeout: 60000,
     showAttemptCount: true,
@@ -45,9 +47,11 @@ class Captcha {
     * 
     * - `sendToTextChannel` - Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked.
     * 
+    * - `kickOnFailure` - Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
+    * 
     * - `attempts` - The Number of Attempts Given to Solve the CAPTCHA.
     * 
-    * - `timeout` - The Time in Milliseconds before the CAPTCHA expires and the User is Kicked.
+    * - `timeout` - The Time in Milliseconds before the CAPTCHA expires and the User fails the CAPTCHA.
     * 
     * - `showAttemptCount` - Whether you want to show the Attempt Count in the CAPTCHA Prompt. (Displayed in Embed Footer)
     * 
@@ -71,8 +75,9 @@ class Captcha {
     *     roleID: "Role ID Here",
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
+    *     kickOnFailure: true, //optional, defaults to true
     *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
-    *     timeout: 30000, //optional. amount of time the user has to solve the captcha on each attempt in milliseconds
+    *     timeout: 30000, //optional. time the user has to solve the captcha on each attempt in milliseconds
     *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
     *     customPromptEmbed: new MessageEmbed(), //custom embed for the captcha prompt
     *     customSuccessEmbed: new MessageEmbed(), //custom embed for success message
@@ -154,8 +159,9 @@ class Captcha {
     *     roleID: "Role ID Here",
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
+    *     kickOnFailure: true, //optional, defaults to true
     *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
-    *     timeout: 30000, //optional. amount of time the user has to solve the captcha on each attempt in milliseconds
+    *     timeout: 30000, //optional. time the user has to solve the captcha on each attempt in milliseconds
     *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
     *     customPromptEmbed: new MessageEmbed(), //custom embed for the captcha prompt
     *     customSuccessEmbed: new MessageEmbed(), //custom embed for success message
@@ -174,8 +180,7 @@ class Captcha {
 
         let captchaIncorrect = new Discord.MessageEmbed()
             .setTitle("❌ You Failed to Complete the CAPTCHA!")
-            .setDescription(`${member.user}, you didn't solve the CAPTCHA, and you were kicked from **${member.guild.name}**.\nCAPTCHA Text: **${captcha.text}**`)
-            .addField("What Should I Do?", "No need to worry! You can just try again by re-joining the server!")
+            .setDescription(`${member.user}, you failed to solve the CAPTCHA.\nCAPTCHA Text: **${captcha.text}**`)
             .setTimestamp()
             .setColor("RED")
             .setThumbnail(member.guild.iconURL())
@@ -198,7 +203,7 @@ class Captcha {
             .setThumbnail(member.guild.iconURL())
 
         if (this.options.customPromptEmbed) captchaPrompt = this.options.customPromptEmbed
-        if (this.options.showAttemptCount) captchaPrompt.setFooter(this.options.attempts == 1 ? "Failure to solve the CAPTCHA will have you kicked from the server. You can try again by re-joining!" : `Attempts Left: ${attemptsLeft}`)
+        if (this.options.showAttemptCount) captchaPrompt.setFooter(this.options.attempts == 1 ? "You have one attempt to solve the CAPTCHA." : `Attempts Left: ${attemptsLeft}`)
         captchaPrompt.setImage('attachment://captcha.png')
 
         await handleChannelType(this.client, this.options, user).then(async channel => {
@@ -240,7 +245,7 @@ class Captcha {
                 })
                     .then(async responses => {
                         if (!responses.size) { //If no response was given, CAPTCHA is fully cancelled here
-                            await member.kick("Failed to Pass CAPTCHA")
+                            if (options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                             await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
@@ -279,8 +284,8 @@ class Captcha {
                                 }
                                 return handleAttempt(options);
                             }
-                            //If there are no attempts left, the user is kicked here
-                            await member.kick("Failed to Pass CAPTCHA")
+                            //If there are no attempts left
+                            if (options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
