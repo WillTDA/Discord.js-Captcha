@@ -1,6 +1,8 @@
 const Discord = require("discord.js");
+const EventEmitter = require("events");
 const createCaptcha = require("./createCaptcha");
 const handleChannelType = require("./handleChannelType");
+
 /**
  * Captcha Options
  * @typedef {object} captchaOptions
@@ -32,7 +34,7 @@ const captchaOptions = {
     customFailureEmbed: undefined
 }
 
-class Captcha {
+class Captcha extends EventEmitter {
 
     /**
     * Creates a New Instance of the Captcha Class.
@@ -85,6 +87,7 @@ class Captcha {
     * });
        */
     constructor(client, options = {}) {
+        super();
 
         const structure = `
         new Captcha(Discord#Client, {
@@ -177,10 +180,12 @@ class Captcha {
         const user = member.user
         const captcha = await createCaptcha().catch(e => { return console.log(e) })
         let attemptsLeft = this.options.attempts || 1;
+        let attemptsTaken = 1;
+        let captchaResponses = [];
 
         let captchaIncorrect = new Discord.MessageEmbed()
             .setTitle("❌ You Failed to Complete the CAPTCHA!")
-            .setDescription(`${member.user}, you failed to solve the CAPTCHA.\nCAPTCHA Text: **${captcha.text}**`)
+            .setDescription(`${member.user}, you failed to solve the CAPTCHA!\n\nCAPTCHA Text: **${captcha.text}**`)
             .setTimestamp()
             .setColor("RED")
             .setThumbnail(member.guild.iconURL())
@@ -239,13 +244,23 @@ class Captcha {
                 return (x.author.id == member.user.id)
             }
 
-            async function handleAttempt(options) { //Handles CAPTCHA Responses and Checks
+            async function handleAttempt(captchaData) { //Handles CAPTCHA Responses and Checks
                 await captchaEmbed.channel.awaitMessages({
-                    filter: captchaFilter, max: 1, time: options.timeout
+                    filter: captchaFilter, max: 1, time: captchaData.options.timeout
                 })
                     .then(async responses => {
                         if (!responses.size) { //If no response was given, CAPTCHA is fully cancelled here
-                            if (options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
+
+                            //emit timeout event
+                            captchaData.emit("timeout", {
+                                member: member,
+                                responses: captchaResponses,
+                                attempts: attemptsTaken,
+                                captchaText: captcha.text,
+                                captchaOptions: captchaData.options
+                            })
+                            
+                            if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                             await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
@@ -253,11 +268,29 @@ class Captcha {
                                 });
                         }
 
+                        //emit answer event
+                        captchaData.emit("answer", {
+                            member: member,
+                            response: String(responses.first()),
+                            attempts: attemptsTaken,
+                            captchaText: captcha.text,
+                            captchaOptions: captchaData.options
+                        })
+
                         const answer = String(responses.first()); //Converts the response message to a string
+                        captchaResponses.push(answer); //Adds the answer to the array of answers
                         if (channel.type === "GUILD_TEXT") await responses.first().delete();
 
                         if (answer === captcha.text) { //If the answer is correct, this code will execute
-                            await member.roles.add(options.roleID)
+                            //emit success event
+                            captchaData.emit("success", {
+                                member: member,
+                                responses: captchaResponses,
+                                attempts: attemptsTaken,
+                                captchaText: captcha.text,
+                                captchaOptions: captchaData.options
+                            })
+                            await member.roles.add(captchaData.options.roleID)
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaCorrect] })
                                 .then(async msg => {
@@ -266,7 +299,8 @@ class Captcha {
                         } else { //If the answer is incorrect, this code will execute
                             if (attemptsLeft > 1) { //If there are attempts left
                                 attemptsLeft--;
-                                if (channel.type === "GUILD_TEXT" && options.showAttemptCount) {
+                                attemptsTaken++;
+                                if (channel.type === "GUILD_TEXT" && captchaData.options.showAttemptCount) {
                                     await captchaEmbed.edit({
                                         embeds: [captchaPrompt.setFooter(`Attempts Left: ${attemptsLeft}`)],
                                         files: [
@@ -276,16 +310,26 @@ class Captcha {
                                 }
                                 else if (channel.type !== "GUILD_TEXT") {
                                     await captchaEmbed.channel.send({
-                                        embeds: [options.showAttemptCount ? captchaPrompt.setFooter(`Attempts Left: ${attemptsLeft}`) : captchaPrompt],
+                                        embeds: [captchaData.options.showAttemptCount ? captchaPrompt.setFooter(`Attempts Left: ${attemptsLeft}`) : captchaPrompt],
                                         files: [
                                             { name: "captcha.png", attachment: captcha.image }
                                         ]
                                     })
                                 }
-                                return handleAttempt(options);
+                                return handleAttempt(captchaData);
                             }
                             //If there are no attempts left
-                            if (options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
+
+                            //emit failure event
+                            captchaData.emit("failure", {
+                                member: member,
+                                responses: captchaResponses,
+                                attempts: attemptsTaken,
+                                captchaText: captcha.text,
+                                captchaOptions: captchaData.options
+                            })
+
+                            if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
@@ -294,7 +338,13 @@ class Captcha {
                         }
                     })
             }
-            handleAttempt(this.options);
+            //emit prompt event
+            this.emit("prompt", {
+                member: member,
+                captchaText: captcha.text,
+                captchaOptions: this.options
+            })
+            handleAttempt(this);
         })
     }
 }

@@ -81,6 +81,25 @@ The `sendToTextChannel` option determines whether you want the CAPTCHA to be sen
 
 Use the option `channelID` to specify the Text Channel.
 
+# CAPTCHA Events
+
+There are five events that you can use to log CAPTCHA actions, responses, and other details. They are:
+
+- `prompt`
+- `answer`
+- `success`
+- `failure`
+- `timeout`
+
+All of these events are emitted by the `Captcha` class. Here's an example of how to use them:
+
+```js
+captcha.on("success", data => {
+    console.log(`A Member has Solved a CAPTCHA!`);
+    console.log(data);
+});
+```
+
 # What do the CAPTCHAs look like?
 Below is an image of what answering a CAPTCHA will look like when using the default settings:
 
