@@ -2,6 +2,10 @@
     🎓 Discord.js Captcha 🎓
 </h1>
 
+[![NPM](https://nodei.co/npm/discord.js-captcha.png)](https://npmjs.com/package/discord.js-captcha)
+
+[![Downloads](https://img.shields.io/npm/dt/discord.js-captcha?logo=npm&style=flat-square)](https://npmjs.com/package/discord.js-captcha) [![Discord Server](https://img.shields.io/discord/667479986214666272?logo=discord&logoColor=white&style=flat-square)](https://discord.gg/P2g24jp)
+
 A powerful package for Discord.js v13 that allows you to easily create CAPTCHAs for Discord Servers.
 
 ### <u>What is a **CAPTCHA**?</u>
@@ -103,8 +107,10 @@ captcha.on("success", data => {
 # What do the CAPTCHAs look like?
 Below is an image of what answering a CAPTCHA will look like when using the default settings:
 
-![Image of Captcha](https://github.com/WillTDA/discord.js-captcha/blob/master/src/images/captchaExample.jpg?raw=true)
+![Image of Captcha](https://github.com/WillTDA/Discord.js-Captcha/blob/master/src/images/captchaExample.jpg?raw=true)
 
-# Need Help or Find any Bugs? Join Our Discord Server!
+## Contact Me
 
-https://discord.gg/P2g24jp
+- 👋 Need Help? [Join Our Discord Server](https://discord.gg/P2g24jp)!
+
+- 👾 Found a Bug? [Open an Issue](https://github.com/WillTDA/Discord.js-Captcha/issues), or Fork and [Submit a Pull Request](https://github.com/WillTDA/Discord.js-Captcha/pulls) on our [GitHub Repository](https://github.com/WillTDA/Discord.js-Captcha)!
