@@ -260,10 +260,10 @@ class Captcha extends EventEmitter {
                                 captchaOptions: captchaData.options
                             })
                             
-                            if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                             await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
+                                    if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
                                 });
                         }
@@ -329,10 +329,10 @@ class Captcha extends EventEmitter {
                                 captchaOptions: captchaData.options
                             })
 
-                            if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
+                                    if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
                                 });
                         }
