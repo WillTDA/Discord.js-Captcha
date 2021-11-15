@@ -55,6 +55,7 @@ const captcha = new Captcha(client, {
     channelID: "Text Channel ID Here", //optional
     sendToTextChannel: false, //optional, defaults to false
     kickOnFailure: true, //optional, defaults to true. whether you want the bot to kick the user if the captcha is failed
+    caseSensitive: true, //optional, defaults to true. whether you want the captcha responses to be case-sensitive
     attempts: 3, //optional, defaults to 1. number of attempts before captcha is considered to be failed
     timeout: 30000, //optional, defaults to 60000. time the user has to solve the captcha on each attempt in milliseconds
     showAttemptCount: true, //optional, defaults to true. whether to show the number of attempts left in embed footer
