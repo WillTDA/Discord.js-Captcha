@@ -11,6 +11,7 @@ const handleChannelType = require("./handleChannelType");
  * @prop {string} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the option "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
  * @prop {boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the option "channelID" to specify the Text Channel.
  * @prop {boolean} [kickOnFailure=true] (OPTIONAL): Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
+ * @prop {boolean} [caseSensitive=true] (OPTIONAL): Whether you want the CAPTCHA to be case-sensitive.
  * @prop {number} [attempts=1] (OPTIONAL): The Number of Attempts Given to Solve the CAPTCHA.
  * @prop {number} [timeout=60000] (OPTIONAL): The Time in Milliseconds before the CAPTCHA expires and the User fails the CAPTCHA.
  * @prop {boolean} [showAttemptCount=true] (OPTIONAL): Whether you want to show the Attempt Count in the CAPTCHA Prompt. (Displayed in Embed Footer)
@@ -26,6 +27,7 @@ const captchaOptions = {
     channelID: undefined,
     sendToTextChannel: false,
     kickOnFailure: true,
+    caseSensitive: true,
     attempts: 1,
     timeout: 60000,
     showAttemptCount: true,
@@ -50,6 +52,8 @@ class Captcha extends EventEmitter {
     * - `sendToTextChannel` - Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked.
     * 
     * - `kickOnFailure` - Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
+    * 
+    * - `caseSensitive` - Whether you want the the CAPTCHA to be case-sensitive.
     * 
     * - `attempts` - The Number of Attempts Given to Solve the CAPTCHA.
     * 
@@ -78,6 +82,7 @@ class Captcha extends EventEmitter {
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
     *     kickOnFailure: true, //optional, defaults to true
+    *     caseSensitive: true, //optional, defaults to true
     *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
     *     timeout: 30000, //optional. time the user has to solve the captcha on each attempt in milliseconds
     *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
@@ -128,6 +133,10 @@ class Captcha extends EventEmitter {
             console.log(`Discord.js Captcha Error: Option "timeout" must be Greater than 0!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
+        if (options.caseSensitive && (typeof options.caseSensitive !== "boolean")) {
+            console.log(`Discord.js Captcha Error: Option "caseSensitive" is not a boolean!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            process.exit(1)
+        }
         if (options.customPromptEmbed && (typeof options.customPromptEmbed === "string")) {
             console.log(`Discord.js Captcha Error: Option "customPromptEmbed" is not an instance of MessageEmbed!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
@@ -142,6 +151,7 @@ class Captcha extends EventEmitter {
         }
 
         options.attempts = options.attempts || 1;
+        options.caseSensitive = options.caseSensitive || true;
         options.timeout = options.timeout || 60000;
         options.showAttemptCount = options.showAttemptCount || true;
 
@@ -163,6 +173,7 @@ class Captcha extends EventEmitter {
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
     *     kickOnFailure: true, //optional, defaults to true
+    *     caseSensitive: true, //optional, defaults to true
     *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
     *     timeout: 30000, //optional. time the user has to solve the captcha on each attempt in milliseconds
     *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
@@ -249,6 +260,7 @@ class Captcha extends EventEmitter {
                     filter: captchaFilter, max: 1, time: captchaData.options.timeout
                 })
                     .then(async responses => {
+
                         if (!responses.size) { //If no response was given, CAPTCHA is fully cancelled here
 
                             //emit timeout event
@@ -276,8 +288,8 @@ class Captcha extends EventEmitter {
                             captchaText: captcha.text,
                             captchaOptions: captchaData.options
                         })
-
-                        const answer = String(responses.first()); //Converts the response message to a string
+              
+                        const answer = String(options.caseSensitive !== true ? responses.first().toLowercase() : responses.first()); //Converts the response message to a string
                         captchaResponses.push(answer); //Adds the answer to the array of answers
                         if (channel.type === "GUILD_TEXT") await responses.first().delete();
 
