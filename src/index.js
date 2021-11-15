@@ -53,7 +53,7 @@ class Captcha extends EventEmitter {
     * 
     * - `kickOnFailure` - Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
     * 
-    * - `caseSensitive` - Whether you want the the CAPTCHA yo be case-sensitive.
+    * - `caseSensitive` - Whether you want the the CAPTCHA to be case-sensitive.
     * 
     * - `attempts` - The Number of Attempts Given to Solve the CAPTCHA.
     * 
