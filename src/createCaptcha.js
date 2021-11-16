@@ -27,6 +27,32 @@ const chars = [
     "x",
     "y",
     "z",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
     "0",
     "1",
     "2",
@@ -39,7 +65,7 @@ const chars = [
     "9"
 ]
 
-module.exports = async function createCaptcha() {
+module.exports = async function createCaptcha(caseSensitive) {
 
     const canvas = new Canvas(400, 250);
     const ctx = canvas.getContext("2d");
@@ -111,6 +137,7 @@ module.exports = async function createCaptcha() {
     // Set text value and print it to canvas
     ctx.beginPath();
     let text = shuffle(chars).slice(0, 6).join("");
+    if (caseSensitive !== true) text = text.toLowerCase();
     ctx.fillText(text, 0, 0);
 
     // Draw foreground noise

@@ -134,7 +134,7 @@ class Captcha extends EventEmitter {
             process.exit(1)
         }
         if (options.caseSensitive && (typeof options.caseSensitive !== "boolean")) {
-            console.log(`Discord.js Captcha Error: Option "caseSensitive" is not a boolean!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: Option "caseSensitive" must be of type boolean!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
         if (options.customPromptEmbed && (typeof options.customPromptEmbed === "string")) {
@@ -151,9 +151,9 @@ class Captcha extends EventEmitter {
         }
 
         options.attempts = options.attempts || 1;
-        options.caseSensitive = options.caseSensitive || true;
+        if (options.caseSensitive === undefined) options.caseSensitive = true;
         options.timeout = options.timeout || 60000;
-        options.showAttemptCount = options.showAttemptCount || true;
+        if (options.showAttemptCount === undefined) options.showAttemptCount = true;
 
         Object.assign(this.options, options);
     }
@@ -189,7 +189,7 @@ class Captcha extends EventEmitter {
     async present(member) {
         if (!member) return console.log(`Discord.js Captcha Error: No Discord Member was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
         const user = member.user
-        const captcha = await createCaptcha().catch(e => { return console.log(e) })
+        const captcha = await createCaptcha(this.options.caseSensitive).catch(e => { return console.log(e) })
         let attemptsLeft = this.options.attempts || 1;
         let attemptsTaken = 1;
         let captchaResponses = [];
@@ -289,7 +289,8 @@ class Captcha extends EventEmitter {
                             captchaOptions: captchaData.options
                         })
               
-                        const answer = String(options.caseSensitive !== true ? responses.first().toLowercase() : responses.first()); //Converts the response message to a string
+                        let answer = String(responses.first()); //Converts the response message to a string
+                        if (captchaData.options.caseSensitive !== true) answer = answer.toLowerCase(); //If the CAPTCHA is case sensitive, convert the response to lowercase
                         captchaResponses.push(answer); //Adds the answer to the array of answers
                         if (channel.type === "GUILD_TEXT") await responses.first().delete();
 
