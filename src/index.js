@@ -163,7 +163,7 @@ class Captcha extends EventEmitter {
     * 
     * Note: The CAPTCHA will be sent in Direct Messages. (If the user has their DMs locked, it will be Sent in a specified Text Channel.)
     * @param {Discord.GuildMember} member The Discord Server Member to Present the CAPTCHA to.
-    * @returns {Promise<Discord.Message>}
+    * @returns {Promise<boolean>} Whether or not the Member Successfully Solved the CAPTCHA.
     * @example
     * const { Captcha } = require("discord.js-captcha"); 
     * 
@@ -273,11 +273,12 @@ class Captcha extends EventEmitter {
                             })
 
                             await captchaEmbed.delete();
-                            return channel.send({ embeds: [captchaIncorrect] })
+                            channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
                                 });
+                            return false;
                         }
 
                         //emit answer event
@@ -305,10 +306,11 @@ class Captcha extends EventEmitter {
                             })
                             await member.roles.add(captchaData.options.roleID)
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
-                            return channel.send({ embeds: [captchaCorrect] })
+                            channel.send({ embeds: [captchaCorrect] })
                                 .then(async msg => {
                                     if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
                                 });
+                            return true;
                         } else { //If the answer is incorrect, this code will execute
                             if (attemptsLeft > 1) { //If there are attempts left
                                 attemptsLeft--;
@@ -343,11 +345,12 @@ class Captcha extends EventEmitter {
                             })
 
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
-                            return channel.send({ embeds: [captchaIncorrect] })
+                            channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
                                 });
+                            return false;
                         }
                     })
             }
