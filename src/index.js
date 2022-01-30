@@ -199,7 +199,7 @@ class Captcha extends EventEmitter {
             .setDescription(`${member.user}, you failed to solve the CAPTCHA!\n\nCAPTCHA Text: **${captcha.text}**`)
             .setTimestamp()
             .setColor("RED")
-            .setThumbnail(member.guild.iconURL())
+            .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customFailureEmbed) captchaIncorrect = this.options.customFailureEmbed
 
@@ -208,7 +208,7 @@ class Captcha extends EventEmitter {
             .setDescription(`${member.user}, you completed the CAPTCHA successfully, and you have been given access to **${member.guild.name}**!`)
             .setTimestamp()
             .setColor("GREEN")
-            .setThumbnail(member.guild.iconURL())
+            .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customSuccessEmbed) captchaCorrect = this.options.customSuccessEmbed
 
@@ -216,7 +216,7 @@ class Captcha extends EventEmitter {
             .setTitle(`Welcome to ${member.guild.name}!`)
             .addField("I'm Not a Robot", `${member.user}, to gain access to **${member.guild.name}**, please solve the CAPTCHA below!\n\nThis is done to protect the server from raids consisting of spam bots.`)
             .setColor("RANDOM")
-            .setThumbnail(member.guild.iconURL())
+            .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customPromptEmbed) captchaPrompt = this.options.customPromptEmbed
         if (this.options.showAttemptCount) captchaPrompt.setFooter(this.options.attempts == 1 ? "You have one attempt to solve the CAPTCHA." : `Attempts Left: ${attemptsLeft}`)
@@ -271,7 +271,7 @@ class Captcha extends EventEmitter {
                                 captchaText: captcha.text,
                                 captchaOptions: captchaData.options
                             })
-                            
+
                             await captchaEmbed.delete();
                             return channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
@@ -288,7 +288,7 @@ class Captcha extends EventEmitter {
                             captchaText: captcha.text,
                             captchaOptions: captchaData.options
                         })
-              
+
                         let answer = String(responses.first()); //Converts the response message to a string
                         if (captchaData.options.caseSensitive !== true) answer = answer.toLowerCase(); //If the CAPTCHA is case sensitive, convert the response to lowercase
                         captchaResponses.push(answer); //Adds the answer to the array of answers
