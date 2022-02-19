@@ -219,7 +219,7 @@ class Captcha extends EventEmitter {
             .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customPromptEmbed) captchaPrompt = this.options.customPromptEmbed
-        if (this.options.showAttemptCount) captchaPrompt.setFooter(this.options.attempts == 1 ? "You have one attempt to solve the CAPTCHA." : `Attempts Left: ${attemptsLeft}`)
+        if (this.options.showAttemptCount) captchaPrompt.setFooter({ text: this.options.attempts == 1 ? "You have one attempt to solve the CAPTCHA." : `Attempts Left: ${attemptsLeft}`})
         captchaPrompt.setImage('attachment://captcha.png')
 
         await handleChannelType(this.client, this.options, user).then(async channel => {
@@ -317,7 +317,7 @@ class Captcha extends EventEmitter {
                                 attemptsTaken++;
                                 if (channel.type === "GUILD_TEXT" && captchaData.options.showAttemptCount) {
                                     await captchaEmbed.edit({
-                                        embeds: [captchaPrompt.setFooter(`Attempts Left: ${attemptsLeft}`)],
+                                        embeds: [captchaPrompt.setFooter({ text: `Attempts Left: ${attemptsLeft}` })],
                                         files: [
                                             { name: "captcha.png", attachment: captcha.image }
                                         ]
@@ -325,7 +325,7 @@ class Captcha extends EventEmitter {
                                 }
                                 else if (channel.type !== "GUILD_TEXT") {
                                     await captchaEmbed.channel.send({
-                                        embeds: [captchaData.options.showAttemptCount ? captchaPrompt.setFooter(`Attempts Left: ${attemptsLeft}`) : captchaPrompt],
+                                        embeds: [captchaData.options.showAttemptCount ? captchaPrompt.setFooter({ text: `Attempts Left: ${attemptsLeft}` }) : captchaPrompt],
                                         files: [
                                             { name: "captcha.png", attachment: captcha.image }
                                         ]
