@@ -10,6 +10,7 @@ const handleChannelType = require("./handleChannelType");
  * @prop {string} roleID The ID of the Discord Role to Give when the CAPTCHA is complete.
  * @prop {string} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the option "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
  * @prop {boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the option "channelID" to specify the Text Channel.
+ * @prop {boolean} [addOnSuccess=true] (OPTIONAL): Whether you want the Bot to Add the role to the User if the CAPTCHA is Passed/Success.
  * @prop {boolean} [kickOnFailure=true] (OPTIONAL): Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
  * @prop {boolean} [caseSensitive=true] (OPTIONAL): Whether you want the CAPTCHA to be case-sensitive.
  * @prop {number} [attempts=1] (OPTIONAL): The Number of Attempts Given to Solve the CAPTCHA.
@@ -26,6 +27,7 @@ const captchaOptions = {
     roleID: String,
     channelID: undefined,
     sendToTextChannel: false,
+    addOnSuccess: true,
     kickOnFailure: true,
     caseSensitive: true,
     attempts: 1,
@@ -304,7 +306,9 @@ class Captcha extends EventEmitter {
                                 captchaText: captcha.text,
                                 captchaOptions: captchaData.options
                             })
-                            await member.roles.add(captchaData.options.roleID)
+                            if (captchaData.options.addOnSuccess) { // Only adds to role if option is set
+                                await member.roles.add(captchaData.options.roleID)
+                            }
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
                             channel.send({ embeds: [captchaCorrect] })
                                 .then(async msg => {
