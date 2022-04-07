@@ -54,7 +54,7 @@ const captcha = new Captcha(client, {
     roleID: "Role ID Here",
     channelID: "Text Channel ID Here", //optional
     sendToTextChannel: false, //optional, defaults to false
-    addOnSuccess: true, //optional, defaults to true. whether you want the bot to add the role to the user if the captcha is passed
+    addRoleOnSuccess: true, //optional, defaults to true. whether you want the bot to add the role to the user if the captcha is solved
     kickOnFailure: true, //optional, defaults to true. whether you want the bot to kick the user if the captcha is failed
     caseSensitive: true, //optional, defaults to true. whether you want the captcha responses to be case-sensitive
     attempts: 3, //optional, defaults to 1. number of attempts before captcha is considered to be failed

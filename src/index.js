@@ -5,12 +5,12 @@ const handleChannelType = require("./handleChannelType");
 
 /**
  * Captcha Options
- * @typedef {object} captchaOptions
+ * @typedef {object} CaptchaOptions
  * @prop {string} guildID The ID of the Discord Server to Create a CAPTCHA for.
  * @prop {string} roleID The ID of the Discord Role to Give when the CAPTCHA is complete.
  * @prop {string} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the option "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
  * @prop {boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the option "channelID" to specify the Text Channel.
- * @prop {boolean} [addOnSuccess=true] (OPTIONAL): Whether you want the Bot to Add the role to the User if the CAPTCHA is Passed/Success.
+ * @prop {boolean} [addRoleOnSuccess=true] (OPTIONAL): Whether you want the Bot to Add the role to the User if the CAPTCHA is Solved Successfully.
  * @prop {boolean} [kickOnFailure=true] (OPTIONAL): Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
  * @prop {boolean} [caseSensitive=true] (OPTIONAL): Whether you want the CAPTCHA to be case-sensitive.
  * @prop {number} [attempts=1] (OPTIONAL): The Number of Attempts Given to Solve the CAPTCHA.
@@ -21,22 +21,6 @@ const handleChannelType = require("./handleChannelType");
  * @prop {Discord.MessageEmbed} [customFailureEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
  * 
  */
-
-const captchaOptions = {
-    guildID: String,
-    roleID: String,
-    channelID: undefined,
-    sendToTextChannel: false,
-    addOnSuccess: true,
-    kickOnFailure: true,
-    caseSensitive: true,
-    attempts: 1,
-    timeout: 60000,
-    showAttemptCount: true,
-    customPromptEmbed: undefined,
-    customSuccessEmbed: undefined,
-    customFailureEmbed: undefined
-}
 
 class Captcha extends EventEmitter {
 
@@ -52,6 +36,8 @@ class Captcha extends EventEmitter {
     * - `channelID` - The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked.
     * 
     * - `sendToTextChannel` - Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked.
+    * 
+    * - `addRoleOnSuccess` - Whether you want the Bot to Add the role to the User if the CAPTCHA is Solved Successfully.
     * 
     * - `kickOnFailure` - Whether you want the Bot to Kick the User if the CAPTCHA is Failed.
     * 
@@ -69,9 +55,9 @@ class Captcha extends EventEmitter {
     * 
     * - `customFailureEmbed` - Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
     * 
-    * @param {captchaOptions} options The Options for the Captcha.
+    * @param {CaptchaOptions} options The Options for the Captcha.
     * @param {Discord.Client} client The Discord Client.
-    * @param {captchaOptions} options
+    * @param {CaptchaOptions} options
     * @example
     * const { Client, Intents } = require("discord.js");
     * const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.DIRECT_MESSAGES] });
@@ -96,35 +82,31 @@ class Captcha extends EventEmitter {
     constructor(client, options = {}) {
         super();
 
-        const structure = `
-        new Captcha(Discord#Client, {
-            guildID: "Guild ID Here",
-            roleID: "Role ID Here",
-        });
-        
-        (More options can be viewed on the README at https://npmjs.com/discord.js-captcha)`
-
         if (!client) {
-            console.log(`Discord.js Captcha Error: No Discord Client was Provided!\n\nFollow this Structure:\n${structure}\n\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: No Discord Client was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
         this.client = client;
         /**
         * Captcha Options
-        * @type {captchaOptions}
+        * @type {CaptchaOptions}
         */
         this.options = options;
 
         if (!options.guildID) {
-            console.log(`Discord.js Captcha Error: No Discord Guild ID was Provided!\n\nFollow this Structure:\n${structure}\n\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: No Discord Guild ID was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1);
         }
         if (!options.roleID) {
-            console.log(`Discord.js Captcha Error: No Discord Role ID was Provided!\n\nFollow this Structure:\n${structure}\n\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: No Discord Role ID was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
         if ((options.sendToTextChannel === true) && (!options.channelID)) {
-            console.log(`Discord.js Captcha Error: Option "sendToTextChannel" was set to true, but "channelID" was not Provided!\n\nFollow this Structure:\n${structure}\n\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: Option "sendToTextChannel" was set to true, but "channelID" was not Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            process.exit(1)
+        }
+        if ((options.addRoleOnSuccess === true) && (!options.roleID)) {
+            console.log(`Discord.js Captcha Error: Option "addRoleOnSuccess" was set to true, but "roleID" was not Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
         if (options.attempts < 1) {
@@ -221,7 +203,7 @@ class Captcha extends EventEmitter {
             .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customPromptEmbed) captchaPrompt = this.options.customPromptEmbed
-        if (this.options.showAttemptCount) captchaPrompt.setFooter({ text: this.options.attempts == 1 ? "You have one attempt to solve the CAPTCHA." : `Attempts Left: ${attemptsLeft}`})
+        if (this.options.showAttemptCount) captchaPrompt.setFooter({ text: this.options.attempts == 1 ? "You have one attempt to solve the CAPTCHA." : `Attempts Left: ${attemptsLeft}` })
         captchaPrompt.setImage('attachment://captcha.png')
 
         await handleChannelType(this.client, this.options, user).then(async channel => {
@@ -306,7 +288,7 @@ class Captcha extends EventEmitter {
                                 captchaText: captcha.text,
                                 captchaOptions: captchaData.options
                             })
-                            if (captchaData.options.addOnSuccess) { // Only adds to role if option is set
+                            if (captchaData.options.addRoleOnSuccess === true) { // Only adds to role if option is set
                                 await member.roles.add(captchaData.options.roleID)
                             }
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
