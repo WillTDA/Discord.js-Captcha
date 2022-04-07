@@ -130,7 +130,7 @@ class Captcha extends EventEmitter {
             process.exit(1)
         }
 
-        if (!options.addRoleOnSuccess === undefined) options.addRoleOnSuccess = true;
+        if (options.addRoleOnSuccess === undefined) options.addRoleOnSuccess = true;
         options.attempts = options.attempts || 1;
         if (options.caseSensitive === undefined) options.caseSensitive = true;
         options.timeout = options.timeout || 60000;
