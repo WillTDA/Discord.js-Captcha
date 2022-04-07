@@ -51,7 +51,7 @@ const { Captcha } = require("discord.js-captcha");
 
 const captcha = new Captcha(client, {
     guildID: "Guild ID Here",
-    roleID: "Role ID Here",
+    roleID: "Role ID Here", //optional
     channelID: "Text Channel ID Here", //optional
     sendToTextChannel: false, //optional, defaults to false
     addRoleOnSuccess: true, //optional, defaults to true. whether you want the bot to add the role to the user if the captcha is solved

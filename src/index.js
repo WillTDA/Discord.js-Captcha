@@ -7,7 +7,7 @@ const handleChannelType = require("./handleChannelType");
  * Captcha Options
  * @typedef {object} CaptchaOptions
  * @prop {string} guildID The ID of the Discord Server to Create a CAPTCHA for.
- * @prop {string} roleID The ID of the Discord Role to Give when the CAPTCHA is complete.
+ * @prop {string} [roleID=undefined] (OPTIONAL): The ID of the Discord Role to Give when the CAPTCHA is complete.
  * @prop {string} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the option "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
  * @prop {boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the option "channelID" to specify the Text Channel.
  * @prop {boolean} [addRoleOnSuccess=true] (OPTIONAL): Whether you want the Bot to Add the role to the User if the CAPTCHA is Solved Successfully.
@@ -66,7 +66,7 @@ class Captcha extends EventEmitter {
     * 
     * const captcha = new Captcha(client, {
     *     guildID: "Guild ID Here",
-    *     roleID: "Role ID Here",
+    *     roleID: "Role ID Here", //optional
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
     *     kickOnFailure: true, //optional, defaults to true
@@ -96,10 +96,6 @@ class Captcha extends EventEmitter {
         if (!options.guildID) {
             console.log(`Discord.js Captcha Error: No Discord Guild ID was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1);
-        }
-        if (!options.roleID) {
-            console.log(`Discord.js Captcha Error: No Discord Role ID was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
-            process.exit(1)
         }
         if ((options.sendToTextChannel === true) && (!options.channelID)) {
             console.log(`Discord.js Captcha Error: Option "sendToTextChannel" was set to true, but "channelID" was not Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
@@ -153,7 +149,7 @@ class Captcha extends EventEmitter {
     * 
     * const captcha = new Captcha(client, {
     *     guildID: "Guild ID Here",
-    *     roleID: "Role ID Here",
+    *     roleID: "Role ID Here", //optional
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
     *     kickOnFailure: true, //optional, defaults to true
