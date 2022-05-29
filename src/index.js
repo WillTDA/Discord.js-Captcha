@@ -254,7 +254,7 @@ class Captcha extends EventEmitter {
                             })
 
                             await captchaEmbed.delete();
-                            channel.send({ embeds: [captchaIncorrect] })
+                            await channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
@@ -328,7 +328,7 @@ class Captcha extends EventEmitter {
                             })
 
                             if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
-                            channel.send({ embeds: [captchaIncorrect] })
+                            await channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
