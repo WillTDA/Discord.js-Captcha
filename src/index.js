@@ -72,9 +72,9 @@ class Captcha extends EventEmitter {
     *     addRoleOnSuccess: true, //optional, defaults to true
     *     kickOnFailure: true, //optional, defaults to true
     *     caseSensitive: true, //optional, defaults to true
-    *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
-    *     timeout: 30000, //optional. time the user has to solve the captcha on each attempt in milliseconds
-    *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
+    *     attempts: 3, //optional, defaults to 1
+    *     timeout: 30000, //optional, defaults to 60000
+    *     showAttemptCount: true, //optional, defaults to true
     *     customPromptEmbed: new MessageEmbed(), //custom embed for the captcha prompt
     *     customSuccessEmbed: new MessageEmbed(), //custom embed for success message
     *     customFailureEmbed: new MessageEmbed(), //custom embed for failure message
