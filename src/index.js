@@ -69,6 +69,7 @@ class Captcha extends EventEmitter {
     *     roleID: "Role ID Here", //optional
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
+    *     addRoleOnSuccess: true, //optional, defaults to true
     *     kickOnFailure: true, //optional, defaults to true
     *     caseSensitive: true, //optional, defaults to true
     *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
