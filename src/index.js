@@ -1,4 +1,4 @@
-const Discord = require("discord.js");
+const { Client, GuildMember, EmbedBuilder } = require("discord.js");
 const EventEmitter = require("events");
 const createCaptcha = require("./createCaptcha");
 const handleChannelType = require("./handleChannelType");
@@ -16,9 +16,9 @@ const handleChannelType = require("./handleChannelType");
  * @prop {number} [attempts=1] (OPTIONAL): The Number of Attempts Given to Solve the CAPTCHA.
  * @prop {number} [timeout=60000] (OPTIONAL): The Time in Milliseconds before the CAPTCHA expires and the User fails the CAPTCHA.
  * @prop {boolean} [showAttemptCount=true] (OPTIONAL): Whether you want to show the Attempt Count in the CAPTCHA Prompt. (Displayed in Embed Footer)
- * @prop {Discord.EmbedBuilder} [customPromptEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Prompt.
- * @prop {Discord.EmbedBuilder} [customSuccessEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Success Message.
- * @prop {Discord.EmbedBuilder} [customFailureEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
+ * @prop {EmbedBuilder} [customPromptEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Prompt.
+ * @prop {EmbedBuilder} [customSuccessEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Success Message.
+ * @prop {EmbedBuilder} [customFailureEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
  * 
  */
 
@@ -56,7 +56,7 @@ class Captcha extends EventEmitter {
     * - `customFailureEmbed` - Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
     * 
     * @param {CaptchaOptions} options The Options for the Captcha.
-    * @param {Discord.Client} client The Discord Client.
+    * @param {Client} client The Discord Client.
     * @param {CaptchaOptions} options
     * @example
     * const { Client, IntentsBitField, EmbedBuilder } = require("discord.js");
@@ -151,7 +151,7 @@ class Captcha extends EventEmitter {
     * Presents the CAPTCHA to a Discord Server Member.
     * 
     * Note: The CAPTCHA will be sent in Direct Messages. (If the user has their DMs locked, it will be Sent in a specified Text Channel.)
-    * @param {Discord.GuildMember} member The Discord Server Member to Present the CAPTCHA to.
+    * @param {GuildMember} member The Discord Server Member to Present the CAPTCHA to.
     * @returns {Promise<boolean>} Whether or not the Member Successfully Solved the CAPTCHA.
     * @example
     * const { Captcha } = require("discord.js-captcha"); 
@@ -183,7 +183,7 @@ class Captcha extends EventEmitter {
         let attemptsTaken = 1;
         let captchaResponses = [];
 
-        let captchaIncorrect = new Discord.EmbedBuilder()
+        let captchaIncorrect = new EmbedBuilder()
             .setTitle("❌ You Failed to Complete the CAPTCHA!")
             .setDescription(`${member.user}, you failed to solve the CAPTCHA!\n\nCAPTCHA Text: **${captcha.text}**`)
             .setTimestamp()
@@ -192,7 +192,7 @@ class Captcha extends EventEmitter {
 
         if (this.options.customFailureEmbed) captchaIncorrect = this.options.customFailureEmbed
 
-        let captchaCorrect = new Discord.EmbedBuilder()
+        let captchaCorrect = new EmbedBuilder()
             .setTitle("✅ CAPTCHA Solved!")
             .setDescription(`${member.user}, you completed the CAPTCHA successfully, and you have been given access to **${member.guild.name}**!`)
             .setTimestamp()
@@ -201,7 +201,7 @@ class Captcha extends EventEmitter {
 
         if (this.options.customSuccessEmbed) captchaCorrect = this.options.customSuccessEmbed
 
-        let captchaPrompt = new Discord.EmbedBuilder()
+        let captchaPrompt = new EmbedBuilder()
             .setTitle(`Welcome to ${member.guild.name}!`)
             .addFields([{ name: "I'm Not a Robot", value: `${member.user}, to gain access to **${member.guild.name}**, please solve the CAPTCHA below!\n\nThis is done to protect the server from raids consisting of spam bots.` }])
             .setColor("Random")

@@ -1,11 +1,11 @@
-const Discord = require("discord.js");
+const { Client, User, DMChannel, TextChannel } = require("discord.js");
 
 /**
  * 
- * @param {Discord.Client} client
+ * @param {Client} client
  * @param {any} options
- * @param {Discord.User} user
- * @returns {Discord.DMChannel | Discord.TextChannel}
+ * @param {User} user
+ * @returns {DMChannel | TextChannel}
  */
 
 module.exports = async function handleChannelType(client, options, user) {
