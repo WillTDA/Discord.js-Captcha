@@ -16,9 +16,9 @@ const handleChannelType = require("./handleChannelType");
  * @prop {number} [attempts=1] (OPTIONAL): The Number of Attempts Given to Solve the CAPTCHA.
  * @prop {number} [timeout=60000] (OPTIONAL): The Time in Milliseconds before the CAPTCHA expires and the User fails the CAPTCHA.
  * @prop {boolean} [showAttemptCount=true] (OPTIONAL): Whether you want to show the Attempt Count in the CAPTCHA Prompt. (Displayed in Embed Footer)
- * @prop {Discord.MessageEmbed} [customPromptEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Prompt.
- * @prop {Discord.MessageEmbed} [customSuccessEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Success Message.
- * @prop {Discord.MessageEmbed} [customFailureEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
+ * @prop {Discord.EmbedBuilder} [customPromptEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Prompt.
+ * @prop {Discord.EmbedBuilder} [customSuccessEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Success Message.
+ * @prop {Discord.EmbedBuilder} [customFailureEmbed=undefined] (OPTIONAL): Custom Discord Embed to be Shown for the CAPTCHA Failure Message.
  * 
  */
 
@@ -59,27 +59,34 @@ class Captcha extends EventEmitter {
     * @param {Discord.Client} client The Discord Client.
     * @param {CaptchaOptions} options
     * @example
-    * const { Client, Intents } = require("discord.js");
-    * const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.DIRECT_MESSAGES] });
-    * 
-    * const { Captcha } = require("discord.js-captcha"); 
-    * 
+    * const { Client, IntentsBitField, EmbedBuilder } = require("discord.js");
+    * const client = new Client({
+    *    intents: [
+    *        IntentsBitField.Guilds,
+    *        IntentsBitField.GuildMessages,
+    *        IntentsBitField.GuildMembers,
+    *        IntentsBitField.DirectMessages,
+    *    ]
+    * });
+    *
+    * const { Captcha } = require("discord.js-captcha");
+    *
     * const captcha = new Captcha(client, {
     *     guildID: "Guild ID Here",
     *     roleID: "Role ID Here", //optional
     *     channelID: "Text Channel ID Here", //optional
     *     sendToTextChannel: false, //optional, defaults to false
-    *     addRoleOnSuccess: true, //optional, defaults to true
-    *     kickOnFailure: true, //optional, defaults to true
-    *     caseSensitive: true, //optional, defaults to true
-    *     attempts: 3, //optional, defaults to 1
-    *     timeout: 30000, //optional, defaults to 60000
-    *     showAttemptCount: true, //optional, defaults to true
-    *     customPromptEmbed: new MessageEmbed(), //custom embed for the captcha prompt
-    *     customSuccessEmbed: new MessageEmbed(), //custom embed for success message
-    *     customFailureEmbed: new MessageEmbed(), //custom embed for failure message
+    *     addRoleOnSuccess: true, //optional, defaults to true. whether you want the bot to add the role to the user if the captcha is solved
+    *     kickOnFailure: true, //optional, defaults to true. whether you want the bot to kick the user if the captcha is failed
+    *     caseSensitive: true, //optional, defaults to true. whether you want the captcha responses to be case-sensitive
+    *     attempts: 3, //optional, defaults to 1. number of attempts before captcha is considered to be failed
+    *     timeout: 30000, //optional, defaults to 60000. time the user has to solve the captcha on each attempt in milliseconds
+    *     showAttemptCount: true, //optional, defaults to true. whether to show the number of attempts left in embed footer
+    *     customPromptEmbed: new EmbedBuilder(), //customise the embed that will be sent to the user when the captcha is requested
+    *     customSuccessEmbed: new EmbedBuilder(), //customise the embed that will be sent to the user when the captcha is solved
+    *     customFailureEmbed: new EmbedBuilder(), //customise the embed that will be sent to the user when they fail to solve the captcha
     * });
-       */
+    */
     constructor(client, options = {}) {
         super();
 
@@ -119,15 +126,15 @@ class Captcha extends EventEmitter {
             process.exit(1)
         }
         if (options.customPromptEmbed && (typeof options.customPromptEmbed === "string")) {
-            console.log(`Discord.js Captcha Error: Option "customPromptEmbed" is not an instance of MessageEmbed!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: Option "customPromptEmbed" is not an instance of EmbedBuilder!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
         if (options.customSuccessEmbed && (typeof options.customSuccessEmbed === "string")) {
-            console.log(`Discord.js Captcha Error: Option "customSuccessEmbed" is not an instance of MessageEmbed!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: Option "customSuccessEmbed" is not an instance of EmbedBuilder!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
         if (options.customFailureEmbed && (typeof options.customFailureEmbed === "string")) {
-            console.log(`Discord.js Captcha Error: Option "customFailureEmbed" is not an instance of MessageEmbed!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            console.log(`Discord.js Captcha Error: Option "customFailureEmbed" is not an instance of EmbedBuilder!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
         }
 
@@ -159,9 +166,9 @@ class Captcha extends EventEmitter {
     *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
     *     timeout: 30000, //optional. time the user has to solve the captcha on each attempt in milliseconds
     *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
-    *     customPromptEmbed: new MessageEmbed(), //custom embed for the captcha prompt
-    *     customSuccessEmbed: new MessageEmbed(), //custom embed for success message
-    *     customFailureEmbed: new MessageEmbed(), //custom embed for failure message
+    *     customPromptEmbed: new EmbedBuilder(), //custom embed for the captcha prompt
+    *     customSuccessEmbed: new EmbedBuilder(), //custom embed for success message
+    *     customFailureEmbed: new EmbedBuilder(), //custom embed for failure message
     * });
     * 
     * client.on("guildMemberAdd", async member => {
@@ -176,28 +183,28 @@ class Captcha extends EventEmitter {
         let attemptsTaken = 1;
         let captchaResponses = [];
 
-        let captchaIncorrect = new Discord.MessageEmbed()
+        let captchaIncorrect = new Discord.EmbedBuilder()
             .setTitle("❌ You Failed to Complete the CAPTCHA!")
             .setDescription(`${member.user}, you failed to solve the CAPTCHA!\n\nCAPTCHA Text: **${captcha.text}**`)
             .setTimestamp()
-            .setColor("RED")
+            .setColor("Red")
             .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customFailureEmbed) captchaIncorrect = this.options.customFailureEmbed
 
-        let captchaCorrect = new Discord.MessageEmbed()
+        let captchaCorrect = new Discord.EmbedBuilder()
             .setTitle("✅ CAPTCHA Solved!")
             .setDescription(`${member.user}, you completed the CAPTCHA successfully, and you have been given access to **${member.guild.name}**!`)
             .setTimestamp()
-            .setColor("GREEN")
+            .setColor("Green")
             .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customSuccessEmbed) captchaCorrect = this.options.customSuccessEmbed
 
-        let captchaPrompt = new Discord.MessageEmbed()
+        let captchaPrompt = new Discord.EmbedBuilder()
             .setTitle(`Welcome to ${member.guild.name}!`)
-            .addField("I'm Not a Robot", `${member.user}, to gain access to **${member.guild.name}**, please solve the CAPTCHA below!\n\nThis is done to protect the server from raids consisting of spam bots.`)
-            .setColor("RANDOM")
+            .addFields([{ name: "I'm Not a Robot", value: `${member.user}, to gain access to **${member.guild.name}**, please solve the CAPTCHA below!\n\nThis is done to protect the server from raids consisting of spam bots.` }])
+            .setColor("Random")
             .setThumbnail(member.guild.iconURL({ dynamic: true }))
 
         if (this.options.customPromptEmbed) captchaPrompt = this.options.customPromptEmbed
