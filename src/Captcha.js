@@ -65,10 +65,10 @@ class Captcha extends EventEmitter {
     * const { Client, IntentsBitField, EmbedBuilder } = require("discord.js");
     * const client = new Client({
     *    intents: [
-    *        IntentsBitField.Guilds,
-    *        IntentsBitField.GuildMessages,
-    *        IntentsBitField.GuildMembers,
-    *        IntentsBitField.DirectMessages,
+    *        IntentsBitField.Flags.Guilds,
+    *        IntentsBitField.Flags.GuildMessages,
+    *        IntentsBitField.Flags.GuildMembers,
+    *        IntentsBitField.Flags.DirectMessages,
     *    ]
     * });
     *
