@@ -4,6 +4,12 @@ const createCaptcha = require("./createCaptcha");
 const handleChannelType = require("./handleChannelType");
 
 /**
+ * @typedef {Object} CaptchaImageData
+ * @prop {Buffer} image The CAPTCHA Image.
+ * @prop {String} text The Answer to the CAPTCHA.
+ */
+
+/**
  * Captcha Options
  * @typedef {Object} CaptchaOptions
  * @prop {String} guildID The ID of the Discord Server to Create a CAPTCHA for.
@@ -148,11 +154,12 @@ class Captcha extends EventEmitter {
     }
 
     /**
-    * Presents the CAPTCHA to a Discord Server Member.
+    * Presents the CAPTCHA to a `Discord.GuildMember`.
     * 
-    * Note: The CAPTCHA will be sent in Direct Messages. (If the user has their DMs locked, it will be Sent in a specified Text Channel.)
     * @param {GuildMember} member The Discord Server Member to Present the CAPTCHA to.
+    * @param {CaptchaImageData} [customCaptcha=undefined] **(OPTIONAL):** An object consisting of a Custom CAPTCHA Image and Text Answer.
     * @returns {Promise<Boolean>} Whether or not the Member Successfully Solved the CAPTCHA.
+    * @async
     * @example
     * const { Captcha } = require("discord.js-captcha"); 
     * 
@@ -175,10 +182,16 @@ class Captcha extends EventEmitter {
     *     captcha.present(member);
     * });
     */
-    async present(member) {
+    async present(member, customCaptcha) {
         if (!member) return console.log(`Discord.js Captcha Error: No Discord Member was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
-        const user = member.user
-        const captcha = await createCaptcha(6, this.options.caseSensitive ? "" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ").catch(e => { return console.log(e) });
+        if (customCaptcha) {
+            if (!customCaptcha.image) return console.log(`Discord.js Captcha Error: Custom Captcha Image Data does not include an Image Buffer!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            if (!customCaptcha.text) return console.log(`Discord.js Captcha Error: Custom Captcha Image Data does not include a Text Answer!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            if (!Buffer.isBuffer(customCaptcha.image)) return console.log(`Discord.js Captcha Error: Custom Captcha Image is not a Buffer!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+            if (typeof customCaptcha.text !== "string") return console.log(`Discord.js Captcha Error: Custom Captcha Text is not of type String!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+        }
+        const user = member.user;
+        const captcha = customCaptcha || await createCaptcha(6, this.options.caseSensitive ? "" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ").catch(e => { return console.log(e) });
         let attemptsLeft = this.options.attempts || 1;
         let attemptsTaken = 1;
         let captchaResponses = [];

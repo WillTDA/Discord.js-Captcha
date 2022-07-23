@@ -7,77 +7,11 @@ const shuffle = (arr) => {
     return arr;
 };
 
-let chars = [
-    "a",
-    "b",
-    "c",
-    "d",
-    "e",
-    "f",
-    "g",
-    "h",
-    "i",
-    "j",
-    "k",
-    "l",
-    "m",
-    "n",
-    "o",
-    "p",
-    "q",
-    "r",
-    "s",
-    "t",
-    "u",
-    "v",
-    "w",
-    "x",
-    "y",
-    "z",
-    "A",
-    "B",
-    "C",
-    "D",
-    "E",
-    "F",
-    "G",
-    "H",
-    "I",
-    "J",
-    "K",
-    "L",
-    "M",
-    "N",
-    "O",
-    "P",
-    "Q",
-    "R",
-    "S",
-    "T",
-    "U",
-    "V",
-    "W",
-    "X",
-    "Y",
-    "Z",
-    "0",
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9"
-];
-
-class CaptchaImageData {
-    /**
-     * @param {string} image The CAPTCHA Image.
-     * @param {string} text The Answer to the CAPTCHA.
-     */
-}
+/**
+ * @typedef {Object} CaptchaImageData
+ * @prop {Buffer} image The CAPTCHA Image.
+ * @prop {String} text The Answer to the CAPTCHA.
+ */
 
 /**
  * Asynchronously Generates a CAPTCHA.
@@ -88,6 +22,71 @@ class CaptchaImageData {
 
 module.exports = async function createCaptcha(length = 6, blacklist = "") {
 
+    let chars = [
+        "a",
+        "b",
+        "c",
+        "d",
+        "e",
+        "f",
+        "g",
+        "h",
+        "i",
+        "j",
+        "k",
+        "l",
+        "m",
+        "n",
+        "o",
+        "p",
+        "q",
+        "r",
+        "s",
+        "t",
+        "u",
+        "v",
+        "w",
+        "x",
+        "y",
+        "z",
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K",
+        "L",
+        "M",
+        "N",
+        "O",
+        "P",
+        "Q",
+        "R",
+        "S",
+        "T",
+        "U",
+        "V",
+        "W",
+        "X",
+        "Y",
+        "Z",
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9"
+    ];
+
     //check for canvas installation
     try { require("canvas") }
     catch { throw new Error("Discord.js Captcha Generation Error: Automatic CAPTCHA Creation requires the 'canvas' library to be installed.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'") }
@@ -96,7 +95,7 @@ module.exports = async function createCaptcha(length = 6, blacklist = "") {
     // Validate length param
     if (Number.isNaN(length)) throw new Error("Discord.js Captcha Generation Error: Length must be a Number.");
     if (length < 1) throw new Error("Discord.js Captcha Generation Error: The CAPTCHA Length must be at least 1 character.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'");
-    
+
     // Validate blacklist param
     if (typeof blacklist !== "string") throw new Error("Discord.js Captcha Generation Error: The blacklist parameter must be a string.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'");
     if (blacklist.match(/[^a-zA-Z0-9]/)) throw new Error("Discord.js Captcha Generation Error: The blacklist parameter must only contain alphanumeric characters.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'");
