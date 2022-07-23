@@ -17,5 +17,5 @@ module.exports = async function handleChannelType(client, options, member) {
             channel = (await client.guilds.fetch(member.guild.id)).channels.resolve(options.channelID);
         }
     }
-    return channel
+    return channel;
 }

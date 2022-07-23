@@ -117,6 +117,23 @@ client.on("guildMemberAdd", async member => {
 
 In addition, if you have the `showAttemptCount` option enabled, any embed footer text on the `customPromptEmbed` will be overwritten with the number of attempts left.
 
+## Manually Creating a CAPTCHA
+
+You can use the `createCaptcha` method to easily create your own CAPTCHA using Discord.js Captcha's Built-In CAPTCHA Creation. It also comes with broader control over the length of the CAPTCHA, and the characters you would like to use by using a blacklist.
+
+**Note:** Built-In CAPTCHA Creation uses `A-Z`, `a-z` and `0-9`.
+
+```js
+const { createCaptcha } = require("discord.js-captcha");
+
+(async () => {
+    //creating a CAPTCHA with 4 characters, and EXCLUDING numbers
+    const myCaptcha = await createCaptcha(4, "0123456789");
+    console.log(myCaptcha);
+    // => { image: Buffer, text: "aBCd" }
+})();
+```
+
 # CAPTCHA Events
 
 There are five events that you can use to log CAPTCHA actions, responses, and other details. They are:
