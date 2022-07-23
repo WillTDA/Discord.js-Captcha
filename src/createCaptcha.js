@@ -1,6 +1,13 @@
-const { Canvas } = require("canvas");
-const { shuffle } = require("lodash");
-const chars = [
+const shuffle = (arr) => {
+    let i = arr.length;
+    while (i) {
+        let j = Math.floor(Math.random() * i--);
+        [arr[j], arr[i]] = [arr[i], arr[j]];
+    }
+    return arr;
+};
+
+let chars = [
     "a",
     "b",
     "c",
@@ -63,9 +70,40 @@ const chars = [
     "7",
     "8",
     "9"
-]
+];
 
-module.exports = async function createCaptcha(caseSensitive) {
+class CaptchaImageData {
+    /**
+     * @param {string} image The CAPTCHA Image.
+     * @param {string} text The Answer to the CAPTCHA.
+     */
+}
+
+/**
+ * Asynchronously Generates a CAPTCHA.
+ * @param {Number} [length=6] The Text Length of the CAPTCHA. Defaults to 6.
+ * @param {String} [blacklist=""] A List of Characters to Exclude from the CAPTCHA.
+ * @returns {CaptchaImageData} The CAPTCHA Image Data.
+ */
+
+module.exports = async function createCaptcha(length = 6, blacklist = "") {
+
+    //check for canvas installation
+    try { require("canvas") }
+    catch { throw new Error("Discord.js Captcha Generation Error: Automatic CAPTCHA Creation requires the 'canvas' library to be installed.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'") }
+    const { Canvas } = require("canvas");
+
+    // Validate length param
+    if (Number.isNaN(length)) throw new Error("Discord.js Captcha Generation Error: Length must be a Number.");
+    if (length < 1) throw new Error("Discord.js Captcha Generation Error: The CAPTCHA Length must be at least 1 character.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'");
+    
+    // Validate blacklist param
+    if (typeof blacklist !== "string") throw new Error("Discord.js Captcha Generation Error: The blacklist parameter must be a string.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'");
+    if (blacklist.match(/[^a-zA-Z0-9]/)) throw new Error("Discord.js Captcha Generation Error: The blacklist parameter must only contain alphanumeric characters.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'");
+
+    // Remove blacklisted characters from the character list
+    chars.splice(0, chars.length, ...chars.filter(c => !blacklist.includes(c)));
+    chars = shuffle(chars);
 
     const canvas = new Canvas(400, 250);
     const ctx = canvas.getContext("2d");
@@ -114,7 +152,7 @@ module.exports = async function createCaptcha(caseSensitive) {
 
     // Set style for circles
     ctx.fillStyle = "#000";
-    ctx.lineWidth = 0;
+    ctx.line400 = 0;
 
     // Draw circles
     for (let i = 0; i < 200; i++) {
@@ -123,9 +161,15 @@ module.exports = async function createCaptcha(caseSensitive) {
         ctx.fill();
     }
 
-    // Set style for text
-    ctx.font = "80px Sans";
+    // generate text
+    let text = "";
+    for (let i = 0; i < length; i++) text += chars[Math.floor(Math.random() * chars.length)];
+
+
+    // Set style for text based on length param
+    ctx.font = `${length > 6 ? (80 / (length / 7.5)) : 80}px Sans`;
     ctx.fillStyle = "#000";
+
 
     // Set position for text
     ctx.textAlign = "center";
@@ -136,8 +180,6 @@ module.exports = async function createCaptcha(caseSensitive) {
 
     // Set text value and print it to canvas
     ctx.beginPath();
-    let text = shuffle(chars).slice(0, 6).join("");
-    if (caseSensitive !== true) text = text.toLowerCase();
     ctx.fillText(text, 0, 0);
 
     // Draw foreground noise
