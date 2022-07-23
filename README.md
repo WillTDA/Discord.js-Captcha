@@ -62,7 +62,6 @@ client.login("Discord Bot Token");
 const { Captcha } = require("discord.js-captcha");
 
 const captcha = new Captcha(client, {
-    guildID: "Guild ID Here",
     roleID: "Role ID Here", //optional
     channelID: "Text Channel ID Here", //optional
     sendToTextChannel: false, //optional, defaults to false

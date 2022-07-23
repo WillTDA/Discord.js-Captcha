@@ -12,7 +12,6 @@ const handleChannelType = require("./handleChannelType");
 /**
  * Captcha Options
  * @typedef {Object} CaptchaOptions
- * @prop {String} guildID The ID of the Discord Server to Create a CAPTCHA for.
  * @prop {String} [roleID=undefined] (OPTIONAL): The ID of the Discord Role to Give when the CAPTCHA is complete.
  * @prop {String} [channelID=undefined] (OPTIONAL): The ID of the Discord Text Channel to Send the CAPTCHA to if the user's Direct Messages are locked. Use the option "sendToTextChannel", and set it to "true" to always send the CAPTCHA to the Text Channel.
  * @prop {Boolean} [sendToTextChannel=false] (OPTIONAL): Whether you want the CAPTCHA to be sent to a specified Text Channel instead of Direct Messages, regardless of whether the user's DMs are locked. Use the option "channelID" to specify the Text Channel.
@@ -34,8 +33,6 @@ class Captcha extends EventEmitter {
     * Creates a New Instance of the Captcha Class.
     * 
     * __Captcha Options__
-    * 
-    * - `guildID` - The ID of the Discord Server to Create a CAPTCHA for.
     * 
     * - `roleID` - The ID of the Discord Role to Give when the CAPTCHA is complete.
     * 
@@ -78,16 +75,15 @@ class Captcha extends EventEmitter {
     * const { Captcha } = require("discord.js-captcha");
     *
     * const captcha = new Captcha(client, {
-    *     guildID: "Guild ID Here",
-    *     roleID: "Role ID Here", //optional
-    *     channelID: "Text Channel ID Here", //optional
-    *     sendToTextChannel: false, //optional, defaults to false
-    *     addRoleOnSuccess: true, //optional, defaults to true. whether you want the bot to add the role to the user if the captcha is solved
-    *     kickOnFailure: true, //optional, defaults to true. whether you want the bot to kick the user if the captcha is failed
-    *     caseSensitive: true, //optional, defaults to true. whether you want the captcha responses to be case-sensitive
-    *     attempts: 3, //optional, defaults to 1. number of attempts before captcha is considered to be failed
-    *     timeout: 30000, //optional, defaults to 60000. time the user has to solve the captcha on each attempt in milliseconds
-    *     showAttemptCount: true, //optional, defaults to true. whether to show the number of attempts left in embed footer
+    *     roleID: "Role ID Here",
+    *     channelID: "Text Channel ID Here",
+    *     sendToTextChannel: false, //defaults to false
+    *     addRoleOnSuccess: true, //defaults to true. whether you want the bot to add the role to the user if the captcha is solved
+    *     kickOnFailure: true, //defaults to true. whether you want the bot to kick the user if the captcha is failed
+    *     caseSensitive: true, //defaults to true. whether you want the captcha responses to be case-sensitive
+    *     attempts: 3, //defaults to 1. number of attempts before captcha is considered to be failed
+    *     timeout: 30000, //defaults to 60000. time the user has to solve the captcha on each attempt in milliseconds
+    *     showAttemptCount: true, //defaults to true. whether to show the number of attempts left in embed footer
     *     customPromptEmbed: new EmbedBuilder(), //customise the embed that will be sent to the user when the captcha is requested
     *     customSuccessEmbed: new EmbedBuilder(), //customise the embed that will be sent to the user when the captcha is solved
     *     customFailureEmbed: new EmbedBuilder(), //customise the embed that will be sent to the user when they fail to solve the captcha
@@ -107,10 +103,6 @@ class Captcha extends EventEmitter {
         */
         this.options = options;
 
-        if (!options.guildID) {
-            console.log(`Discord.js Captcha Error: No Discord Guild ID was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
-            process.exit(1);
-        }
         if ((options.sendToTextChannel === true) && (!options.channelID)) {
             console.log(`Discord.js Captcha Error: Option "sendToTextChannel" was set to true, but "channelID" was not Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
             process.exit(1)
@@ -164,18 +156,17 @@ class Captcha extends EventEmitter {
     * const { Captcha } = require("discord.js-captcha"); 
     * 
     * const captcha = new Captcha(client, {
-    *     guildID: "Guild ID Here",
-    *     roleID: "Role ID Here", //optional
-    *     channelID: "Text Channel ID Here", //optional
-    *     sendToTextChannel: false, //optional, defaults to false
-    *     kickOnFailure: true, //optional, defaults to true
-    *     caseSensitive: true, //optional, defaults to true
-    *     attempts: 3, //optional. number of attempts before captcha is considered to be failed
-    *     timeout: 30000, //optional. time the user has to solve the captcha on each attempt in milliseconds
-    *     showAttemptCount: true, //optional. whether to show the number of attempts left in embed footer
-    *     customPromptEmbed: new EmbedBuilder(), //custom embed for the captcha prompt
-    *     customSuccessEmbed: new EmbedBuilder(), //custom embed for success message
-    *     customFailureEmbed: new EmbedBuilder(), //custom embed for failure message
+    *     roleID: "Role ID Here",
+    *     channelID: "Text Channel ID Here",
+    *     sendToTextChannel: false,
+    *     kickOnFailure: true,
+    *     caseSensitive: true,
+    *     attempts: 3,
+    *     timeout: 30000,
+    *     showAttemptCount: true,
+    *     customPromptEmbed: new EmbedBuilder(),
+    *     customSuccessEmbed: new EmbedBuilder(),
+    *     customFailureEmbed: new EmbedBuilder(),
     * });
     * 
     * client.on("guildMemberAdd", async member => {
@@ -228,7 +219,7 @@ class Captcha extends EventEmitter {
             let captchaEmbed;
             try {
                 if ((this.options.channelID) && this.options.sendToTextChannel == true) {
-                    channel = (await this.client.guilds.fetch(this.options.guildID)).channels.resolve(this.options.channelID)
+                    channel = (await this.client.guilds.fetch(member.guild.id)).channels.resolve(this.options.channelID)
                 }
                 else {
                     channel = await user.createDM()
@@ -240,7 +231,7 @@ class Captcha extends EventEmitter {
                     ]
                 })
             } catch {
-                channel = (await this.client.guilds.fetch(this.options.guildID)).channels.resolve(this.options.channelID)
+                channel = (await this.client.guilds.fetch(member.guild.id)).channels.resolve(this.options.channelID)
                 if (this.options.channelID) {
                     captchaEmbed = await channel.send({
                         embeds: [captchaPrompt],
