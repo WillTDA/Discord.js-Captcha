@@ -215,7 +215,7 @@ class Captcha extends EventEmitter {
         if (this.options.showAttemptCount) captchaPrompt.setFooter({ text: this.options.attempts == 1 ? "You have one attempt to solve the CAPTCHA." : `Attempts Left: ${attemptsLeft}` })
         captchaPrompt.setImage('attachment://captcha.png')
 
-        await handleChannelType(this.client, this.options, user).then(async channel => {
+        await handleChannelType(this.client, this.options, member).then(async channel => {
             let captchaEmbed;
             try {
                 if ((this.options.channelID) && this.options.sendToTextChannel == true) {
