@@ -67,6 +67,7 @@ class Captcha extends EventEmitter {
     *    intents: [
     *        IntentsBitField.Flags.Guilds,
     *        IntentsBitField.Flags.GuildMessages,
+    *        IntentsBitField.Flags.MessageContent, //IMPORTANT: make sure you enable "Message Content Intent" in the dev portal!
     *        IntentsBitField.Flags.GuildMembers,
     *        IntentsBitField.Flags.DirectMessages,
     *    ]
