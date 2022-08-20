@@ -1,4 +1,4 @@
-const { Client, GuildMember, EmbedBuilder } = require("discord.js");
+const { Client, GuildMember, EmbedBuilder, ChannelType } = require("discord.js");
 const EventEmitter = require("events");
 const createCaptcha = require("./createCaptcha");
 const handleChannelType = require("./handleChannelType");
@@ -183,7 +183,7 @@ class Captcha extends EventEmitter {
             if (typeof customCaptcha.text !== "string") return console.log(`Discord.js Captcha Error: Custom Captcha Text is not of type String!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
         }
         const user = member.user;
-        const captcha = customCaptcha || await createCaptcha(6, this.options.caseSensitive ? "" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ").catch(e => { return console.log(e) });
+        const captcha = customCaptcha ? customCaptcha : await createCaptcha(6, this.options.caseSensitive ? "" : "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         let attemptsLeft = this.options.attempts || 1;
         let attemptsTaken = 1;
         let captchaResponses = [];
@@ -270,7 +270,7 @@ class Captcha extends EventEmitter {
                             await channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
-                                    if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
+                                    if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
                             return false;
                         }
@@ -287,7 +287,7 @@ class Captcha extends EventEmitter {
                         let answer = String(responses.first()); //Converts the response message to a string
                         if (captchaData.options.caseSensitive !== true) answer = answer.toLowerCase(); //If the CAPTCHA is case sensitive, convert the response to lowercase
                         captchaResponses.push(answer); //Adds the answer to the array of answers
-                        if (channel.type === "GUILD_TEXT") await responses.first().delete();
+                        if (channel.type === ChannelType.GuildText) await responses.first().delete();
 
                         if (answer === captcha.text) { //If the answer is correct, this code will execute
                             //emit success event
@@ -301,17 +301,17 @@ class Captcha extends EventEmitter {
                             if (captchaData.options.addRoleOnSuccess === true) { // Only adds to role if option is set
                                 await member.roles.add(captchaData.options.roleID)
                             }
-                            if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
+                            if (channel.type === ChannelType.GuildText) await captchaEmbed.delete();
                             channel.send({ embeds: [captchaCorrect] })
                                 .then(async msg => {
-                                    if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
+                                    if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
                             return true;
                         } else { //If the answer is incorrect, this code will execute
                             if (attemptsLeft > 1) { //If there are attempts left
                                 attemptsLeft--;
                                 attemptsTaken++;
-                                if (channel.type === "GUILD_TEXT" && captchaData.options.showAttemptCount) {
+                                if (channel.type === ChannelType.GuildText && captchaData.options.showAttemptCount) {
                                     await captchaEmbed.edit({
                                         embeds: [captchaPrompt.setFooter({ text: `Attempts Left: ${attemptsLeft}` })],
                                         files: [
@@ -319,7 +319,7 @@ class Captcha extends EventEmitter {
                                         ]
                                     })
                                 }
-                                else if (channel.type !== "GUILD_TEXT") {
+                                else if (channel.type !== ChannelType.GuildText) {
                                     await captchaEmbed.channel.send({
                                         embeds: [captchaData.options.showAttemptCount ? captchaPrompt.setFooter({ text: `Attempts Left: ${attemptsLeft}` }) : captchaPrompt],
                                         files: [
@@ -340,11 +340,11 @@ class Captcha extends EventEmitter {
                                 captchaOptions: captchaData.options
                             })
 
-                            if (channel.type === "GUILD_TEXT") await captchaEmbed.delete();
+                            if (channel.type === ChannelType.GuildText) await captchaEmbed.delete();
                             await channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
-                                    if (channel.type === "GUILD_TEXT") setTimeout(() => msg.delete(), 3000);
+                                    if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
                             return false;
                         }
