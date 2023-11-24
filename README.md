@@ -10,7 +10,7 @@
 
 <a href="https://www.buymeacoffee.com/willtda" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
-A powerful package for Discord.js v14 that allows you to easily create CAPTCHAs for Discord Servers.
+Discord.js Captcha is a powerful package for Discord.js v14 that allows you to easily create CAPTCHAs for Discord Servers.
 
 ### <u>What is a **CAPTCHA**?</u>
 
