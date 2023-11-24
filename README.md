@@ -2,9 +2,13 @@
     🎓 Discord.js Captcha 🎓
 </h1>
 
+<center style="margin-bottom:1rem;">A powerful package for Discord.js v14 that allows you to easily create CAPTCHAs for Discord Servers.</center>
+
 [![NPM](https://nodei.co/npm/discord.js-captcha.png)](https://npmjs.com/package/discord.js-captcha)
 
-[![Downloads](https://img.shields.io/npm/dt/discord.js-captcha?logo=npm&style=flat-square)](https://npmjs.com/package/discord.js-captcha) [![Discord Server](https://img.shields.io/discord/667479986214666272?logo=discord&logoColor=white&style=flat-square)](https://discord.gg/P2g24jp)
+[![Downloads](https://img.shields.io/npm/dt/discord.js-captcha?logo=npm&style=flat-square)](https://npmjs.com/package/discord.js-captcha) [![Discord Server](https://img.shields.io/discord/667479986214666272?logo=discord&logoColor=white&style=flat-square)](https://diamonddigital.dev/discord)
+
+<a href="https://www.buymeacoffee.com/willtda" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 
 A powerful package for Discord.js v14 that allows you to easily create CAPTCHAs for Discord Servers.
 
@@ -38,7 +42,7 @@ For versions 3.0.0 and above, you'll also need Discord.js v14.
 
 `npm i discord.js@14 --save`
 
-For versions earlier than 3.0.0, you'll need Discord.js v13 instead. However it is recommended you update to gain access to more customisation options, as well as to patch bugs and security vulnerabilities!
+For versions **earlier than 3.0.0**, you'll need Discord.js v13 instead. However it is recommended you update to gain access to more customisation options, as well as to patch bugs and security vulnerabilities!
 
 `npm i discord.js@13 --save`
 
@@ -103,7 +107,7 @@ client.on("guildMemberAdd", async member => {
 
 ## Presenting a CAPTCHA to a Member (With Custom CAPTCHA Image Data):
 
-Don't like how the automatically created CAPTCHA looks? Simply pass in your own `CaptchaImageData` to the `present` method!
+Don't like how the automatically created CAPTCHA looks? Simply pass in your own `CaptchaImageData` to the `present` method! You can also use Discord.js Captcha's Built-In CAPTCHA Creation to create your own CAPTCHA, and pass that in instead. (More on this [below](#manually-creating-a-captcha))
 
 ```js
 client.on("guildMemberAdd", async member => {
@@ -132,6 +136,9 @@ const { createCaptcha } = require("discord.js-captcha");
     const myCaptcha = await createCaptcha(4, "0123456789");
     console.log(myCaptcha);
     // => { image: Buffer, text: "aBCd" }
+
+    //createCaptcha resolves to an object that can be passed into the present method
+    captcha.present(member, myCaptcha);
 })();
 ```
 
@@ -164,3 +171,8 @@ Below is an image of what answering a CAPTCHA will look like when using the defa
 - 👋 Need Help? [Join Our Discord Server](https://discord.gg/P2g24jp)!
 
 - 👾 Found a Bug? [Open an Issue](https://github.com/WillTDA/Discord.js-Captcha/issues), or Fork and [Submit a Pull Request](https://github.com/WillTDA/Discord.js-Captcha/pulls) on our [GitHub Repository](https://github.com/WillTDA/Discord.js-Captcha)!
+<hr>
+<center>
+<a href="https://diamonddigital.dev/"><strong>Created and maintained by</strong>
+<img align="center" style="width:25%;height:auto" src="https://diamonddigital.dev/img/png/ddd_logo_text_transparent.png" alt="Diamond Digital Development Logo"></a>
+</center>

@@ -88,8 +88,6 @@ module.exports = async function createCaptcha(length = 6, blacklist = "") {
     ];
 
     //check for canvas installation
-    //try { require("canvas") }
-    //catch { throw new Error("Discord.js Captcha Generation Error: Automatic CAPTCHA Creation requires the 'canvas' library to be installed.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'") }
     const { Canvas } = require("canvas");
 
     // Validate length param
