@@ -94,7 +94,7 @@ class Captcha extends EventEmitter {
         super();
 
         //check discord.js version
-        if (version.split(".")[0] < 14) return console.log(`Discord.js Captcha Error: Discord.js v14 or later is required.\nPlease check the README for finding a compatible version for Discord.js v${Discord.version.split(".")[0]}\nNeed help? Join our Discord server at 'https://discord.gg/P2g24jp'`);
+        if (version.split(".")[0] < 14) return console.log(`Discord.js Captcha Error: Discord.js v14 or later is required.\nPlease check the README for finding a compatible version for Discord.js v${version.split(".")[0]}\nNeed help? Join our Discord server at 'https://discord.gg/P2g24jp'`);
 
         if (!client) {
             console.log(`Discord.js Captcha Error: No Discord Client was Provided!\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
