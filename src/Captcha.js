@@ -270,11 +270,15 @@ class Captcha extends EventEmitter {
                             })
 
                             await captchaEmbed.delete();
+                            try{
                             await channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
+                            catch (e) {
+                                console.log ("[CAPTCHA] Error sending captcha timeout message to user "+ member.user.username +". User could have left before answering" + (captchaData.options.kickOnFailure) ? " or user kick failed." : ".");
+                            }
                             return false;
                         }
 
@@ -305,10 +309,14 @@ class Captcha extends EventEmitter {
                                 await member.roles.add(captchaData.options.roleID)
                             }
                             if (channel.type === ChannelType.GuildText) await captchaEmbed.delete();
+                            try{
                             channel.send({ embeds: [captchaCorrect] })
                                 .then(async msg => {
                                     if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
+                            catch (e) {
+                                console.log ("[CAPTCHA] Error sending captcha success message to user " + member.user.username + ".");
+                            }
                             return true;
                         } else { //If the answer is incorrect, this code will execute
                             if (attemptsLeft > 1) { //If there are attempts left
@@ -344,11 +352,15 @@ class Captcha extends EventEmitter {
                             })
 
                             if (channel.type === ChannelType.GuildText) await captchaEmbed.delete();
+                            try{
                             await channel.send({ embeds: [captchaIncorrect] })
                                 .then(async msg => {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
+                            catch (e) {
+                                console.log ("[CAPTCHA] Error sending captcha fail message to user " + member.user.username + (captchaData.options.kickOnFailure) ? " or user kick failed." : ".");
+                            }
                             return false;
                         }
                     })
