@@ -276,7 +276,7 @@ class Captcha extends EventEmitter {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
-                            catch (e) {
+                            } catch (e) {
                                 console.log ("[CAPTCHA] Error sending captcha timeout message to user "+ member.user.username +". User could have left before answering" + (captchaData.options.kickOnFailure) ? " or user kick failed." : ".");
                             }
                             return false;
@@ -314,7 +314,7 @@ class Captcha extends EventEmitter {
                                 .then(async msg => {
                                     if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
-                            catch (e) {
+                            } catch (e) {
                                 console.log ("[CAPTCHA] Error sending captcha success message to user " + member.user.username + ".");
                             }
                             return true;
@@ -358,7 +358,7 @@ class Captcha extends EventEmitter {
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
                                     if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
                                 });
-                            catch (e) {
+                            } catch (e) {
                                 console.log ("[CAPTCHA] Error sending captcha fail message to user " + member.user.username + (captchaData.options.kickOnFailure) ? " or user kick failed." : ".");
                             }
                             return false;

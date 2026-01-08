@@ -1,30 +1,17 @@
 {
-  "name": "discord.js-captcha",
-  "version": "3.0.8",
-  "description": "A powerful package for Discord.js v14 that allows you to easily create CAPTCHAs for Discord Servers.",
+  "name": "libanabelle-captcha",
+  "version": "1.0",
+  "description": "A fork of WillTDA's discord.js-captcha with improved stablity for the anabelle discord bot.",
   "main": "src/index.js",
-  "funding": {
-    "type": "buymeacoffee",
-    "url": "https://www.buymeacoffee.com/willtda"
-  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/WillTDA/Discord.js-Captcha"
+    "url": "https://github.com/KosmicDaKerbal/libanabelle-captcha"
   },
   "keywords": [
-    "discord.js",
-    "discord",
-    "captcha",
-    "discord.js-captcha",
-    "discord.js captcha",
-    "recaptcha",
-    "turing",
-    "test",
-    "robot"
   ],
-  "author": "WillTDA",
+  "author": "KosmicDaKerbal",
   "license": "Apache-2.0"
 }
