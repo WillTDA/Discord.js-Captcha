@@ -1,6 +1,6 @@
 {
   "name": "libanabelle-captcha",
-  "version": "1.0",
+  "version": "1.0.0",
   "description": "A fork of WillTDA's discord.js-captcha with improved stablity for the anabelle discord bot.",
   "main": "src/index.js",
   "scripts": {
