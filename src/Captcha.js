@@ -221,30 +221,36 @@ class Captcha extends EventEmitter {
 
         await handleChannelType(this.client, this.options, member).then(async channel => {
             let captchaEmbed;
-            try {
-                if ((this.options.channelID) && this.options.sendToTextChannel == true) {
-                    channel = (await this.client.guilds.fetch(member.guild.id)).channels.resolve(this.options.channelID)
-                }
-                else {
-                    channel = await user.createDM()
-                }
+            if ((this.options.channelID) && this.options.sendToTextChannel == true) {
+                channel = (await this.client.guilds.fetch(member.guild.id)).channels.resolve(this.options.channelID)
                 captchaEmbed = await channel.send({
                     embeds: [captchaPrompt],
                     files: [
                         { name: "captcha.png", attachment: captcha.image }
                     ]
                 })
-            } catch {
-                channel = (await this.client.guilds.fetch(member.guild.id)).channels.resolve(this.options.channelID)
-                if (this.options.channelID) {
+            } else {
+                try {
+                    channel = await user.createDM()
                     captchaEmbed = await channel.send({
                         embeds: [captchaPrompt],
                         files: [
                             { name: "captcha.png", attachment: captcha.image }
                         ]
                     })
-                } else {
-                    return console.log(`Discord.js Captcha Error: User's Direct Messages are Locked!\nYou can attempt have the CAPTCHA sent to a Text Channel if it can't send to DMs by using the "channelID" Option in the Constructor.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+                } catch (error) {
+                    console.warn("Discord.js Captcha Warning: Failed to send CAPTCHA via DM.", error);
+                    if (this.options.channelID) {
+                        channel = (await this.client.guilds.fetch(member.guild.id)).channels.resolve(this.options.channelID)
+                        captchaEmbed = await channel.send({
+                            embeds: [captchaPrompt],
+                            files: [
+                                { name: "captcha.png", attachment: captcha.image }
+                            ]
+                        })
+                    } else {
+                        return console.warn(`Discord.js Captcha Warning: User's Direct Messages are Locked!\nYou can attempt have the CAPTCHA sent to a Text Channel if it can't send to DMs by using the "channelID" Option in the Constructor.\nNeed Help? Join our Discord Server at 'https://discord.gg/P2g24jp'`);
+                    }
                 }
             }
 
@@ -270,11 +276,20 @@ class Captcha extends EventEmitter {
                             })
 
                             await captchaEmbed.delete();
-                            await channel.send({ embeds: [captchaIncorrect] })
-                                .then(async msg => {
+                            if (channel.type === ChannelType.GuildText) {
+                                await channel.send({ embeds: [captchaIncorrect] })
+                                    .then(async msg => {
+                                        if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
+                                        setTimeout(() => msg.delete(), 3000);
+                                    });
+                            } else {
+                                try {
+                                    await channel.send({ embeds: [captchaIncorrect] })
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
-                                    if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
-                                });
+                                } catch (error) {
+                                    console.warn("Discord.js Captcha Warning: Failed to send DM timeout notice.", error);
+                                }
+                            }
                             return false;
                         }
 
@@ -304,11 +319,19 @@ class Captcha extends EventEmitter {
                             if (captchaData.options.addRoleOnSuccess === true) { // Only adds to role if option is set
                                 await member.roles.add(captchaData.options.roleID)
                             }
-                            if (channel.type === ChannelType.GuildText) await captchaEmbed.delete();
-                            channel.send({ embeds: [captchaCorrect] })
-                                .then(async msg => {
-                                    if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
-                                });
+                            if (channel.type === ChannelType.GuildText) {
+                                await captchaEmbed.delete();
+                                channel.send({ embeds: [captchaCorrect] })
+                                    .then(async msg => {
+                                        setTimeout(() => msg.delete(), 3000);
+                                    });
+                            } else {
+                                try {
+                                    await channel.send({ embeds: [captchaCorrect] })
+                                } catch (error) {
+                                    console.warn("Discord.js Captcha Warning: Failed to send DM success message.", error);
+                                }
+                            }
                             return true;
                         } else { //If the answer is incorrect, this code will execute
                             if (attemptsLeft > 1) { //If there are attempts left
@@ -323,12 +346,16 @@ class Captcha extends EventEmitter {
                                     })
                                 }
                                 else if (channel.type !== ChannelType.GuildText) {
-                                    await captchaEmbed.channel.send({
-                                        embeds: [captchaData.options.showAttemptCount ? captchaPrompt.setFooter({ text: `Attempts Left: ${attemptsLeft}` }) : captchaPrompt],
-                                        files: [
-                                            { name: "captcha.png", attachment: captcha.image }
-                                        ]
-                                    })
+                                    try {
+                                        await captchaEmbed.channel.send({
+                                            embeds: [captchaData.options.showAttemptCount ? captchaPrompt.setFooter({ text: `Attempts Left: ${attemptsLeft}` }) : captchaPrompt],
+                                            files: [
+                                                { name: "captcha.png", attachment: captcha.image }
+                                            ]
+                                        })
+                                    } catch (error) {
+                                        console.warn("Discord.js Captcha Warning: Failed to send DM attempt prompt.", error);
+                                    }
                                 }
                                 return handleAttempt(captchaData);
                             }
@@ -343,12 +370,21 @@ class Captcha extends EventEmitter {
                                 captchaOptions: captchaData.options
                             })
 
-                            if (channel.type === ChannelType.GuildText) await captchaEmbed.delete();
-                            await channel.send({ embeds: [captchaIncorrect] })
-                                .then(async msg => {
+                            if (channel.type === ChannelType.GuildText) {
+                                await captchaEmbed.delete();
+                                await channel.send({ embeds: [captchaIncorrect] })
+                                    .then(async msg => {
+                                        if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
+                                        setTimeout(() => msg.delete(), 3000);
+                                    });
+                            } else {
+                                try {
+                                    await channel.send({ embeds: [captchaIncorrect] })
                                     if (captchaData.options.kickOnFailure) await member.kick("Failed to Pass CAPTCHA")
-                                    if (channel.type === ChannelType.GuildText) setTimeout(() => msg.delete(), 3000);
-                                });
+                                } catch (error) {
+                                    console.warn("Discord.js Captcha Warning: Failed to send DM failure notice.", error);
+                                }
+                            }
                             return false;
                         }
                     })
